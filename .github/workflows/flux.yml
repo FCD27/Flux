@@ -1,0 +1,67 @@
+name: Flux BVB
+
+on:
+  schedule:
+    # Orele sunt UTC. Vara România e UTC+3, iarna UTC+2.
+    # Asta înseamnă la fiecare 30 de minute, aproximativ 07:00–19:00 ora României, luni–vineri.
+    - cron: "*/30 4-16 * * 1-5"
+  workflow_dispatch:        # buton de rulare manuală, în tab-ul Actions
+
+# O singură rulare odată: altfel două rulări simultane se calcă pe state.json
+concurrency:
+  group: flux-bvb
+  cancel-in-progress: false
+
+permissions:
+  contents: write           # ca să poată salva state.json înapoi în repo
+  pages: write
+  id-token: write
+
+jobs:
+  colecteaza:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # FAZA 1: doar pagina, fără notificări.
+      # Când vrei Telegram/mail: adaugă secretele în Settings și șterge "--no-notify".
+      - name: Rulează monitorul
+        env:
+          FLUX_TG_TOKEN:   ${{ secrets.FLUX_TG_TOKEN }}
+          FLUX_TG_CHAT:    ${{ secrets.FLUX_TG_CHAT }}
+          FLUX_SMTP_HOST:  ${{ secrets.FLUX_SMTP_HOST }}
+          FLUX_SMTP_USER:  ${{ secrets.FLUX_SMTP_USER }}
+          FLUX_SMTP_PASS:  ${{ secrets.FLUX_SMTP_PASS }}
+          FLUX_MAIL_TO:    ${{ secrets.FLUX_MAIL_TO }}
+          FLUX_URL_PUBLIC: ${{ vars.FLUX_URL_PUBLIC }}
+        run: python flux_bvb.py --out public/index.html --quiet --no-notify
+
+      - name: Ține minte ce s-a trimis deja
+        run: |
+          git config user.name  "flux-bot"
+          git config user.email "flux-bot@users.noreply.github.com"
+          git add state.json
+          if git diff --staged --quiet; then
+            echo "Nimic nou de memorat."
+          else
+            git commit -m "state: $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  publica:
+    needs: colecteaza
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
