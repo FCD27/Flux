@@ -1,0 +1,942 @@
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap');
+
+:root{
+  --ink:#0A1B21; --panel:#0F272F; --panel-2:#12313A;
+  --rule:#1E4451; --rule-soft:#173743;
+  --text:#DEEDEC; --muted:#7EA3AA; --dim:#4E7681;
+  --turbine:#5AC8D8; --amber:#E9A93F;
+  --up:#5FD39A; --down:#E8615D; --flat:#7EA3AA;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",Inter,system-ui,sans-serif;
+  --body:"IBM Plex Sans",Inter,system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+
+#flux{background:var(--ink);color:var(--text);font-family:var(--body);font-size:15px;
+  line-height:1.5;border-radius:10px;overflow:hidden;border:1px solid var(--rule-soft)}
+
+#flux .masthead{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
+  flex-wrap:wrap;padding:20px 22px 16px;border-bottom:1px solid var(--rule);
+  background:linear-gradient(180deg,var(--panel) 0%,var(--ink) 100%)}
+#flux .brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+#flux .wordmark{font-family:var(--cond);font-weight:700;font-size:30px;letter-spacing:-.02em;
+  text-transform:uppercase;line-height:1;margin:0}
+#flux .wordmark em{font-style:normal;color:var(--turbine)}
+#flux .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--dim)}
+#flux .masthead-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#flux .stamp{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em}
+#flux .stamp b{color:var(--text);font-weight:500}
+
+#flux button{font-family:var(--mono);cursor:pointer;border-radius:4px}
+@media (prefers-reduced-motion:no-preference){#flux button{transition:background .12s,border-color .12s,color .12s}}
+#flux .btn{background:var(--turbine);color:#052026;border:1px solid var(--turbine);font-size:11px;
+  font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:8px 15px}
+#flux .btn:hover{background:#7BD9E6;border-color:#7BD9E6}
+#flux .btn[disabled]{opacity:.45;cursor:progress}
+#flux .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--rule);
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 12px}
+#flux .btn-ghost:hover{color:var(--text);border-color:var(--dim)}
+#flux :focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+#flux .stage{display:grid;grid-template-columns:252px 1fr;min-height:560px}
+#flux .rail{border-right:1px solid var(--rule);padding:16px 14px 22px}
+#flux .main{padding:0 0 8px;min-width:0}
+#flux .rail-label{font-family:var(--mono);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--dim);margin:0 0 10px 2px}
+#flux .rail-block{margin-top:22px}
+
+#flux .tick{display:block;width:100%;text-align:left;background:var(--panel);
+  border:1px solid var(--rule-soft);border-left:3px solid var(--rule);padding:9px 11px;
+  margin-bottom:6px;color:inherit;font-family:var(--body);border-radius:4px}
+#flux .tick:hover{border-color:var(--dim);border-left-color:var(--turbine)}
+#flux .tick[aria-pressed="true"]{background:var(--panel-2);border-left-color:var(--turbine)}
+#flux .tick-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+#flux .sym{font-family:var(--cond);font-weight:700;font-size:17px}
+#flux .cnt{font-family:var(--mono);font-size:11px;color:var(--muted)}
+#flux .co{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#flux .strip{display:flex;gap:2px;margin-top:7px;height:3px}
+#flux .strip i{flex:1;background:var(--rule);border-radius:1px}
+#flux .strip i.pos{background:var(--up)}
+#flux .strip i.neg{background:var(--down)}
+#flux .strip i.neu{background:var(--flat);opacity:.55}
+
+#flux .chips{display:flex;flex-wrap:wrap;gap:5px}
+#flux .chip{background:transparent;border:1px solid var(--rule);color:var(--muted);
+  font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:5px 9px}
+#flux .chip:hover{border-color:var(--dim);color:var(--text)}
+#flux .chip[aria-pressed="true"]{background:var(--rule);color:var(--text);border-color:var(--dim)}
+
+#flux .verify{display:flex;flex-direction:column;gap:5px}
+#flux .verify a{font-family:var(--mono);font-size:10.5px;color:var(--turbine);text-decoration:none;
+  border:1px solid var(--rule-soft);border-radius:4px;padding:6px 9px;background:var(--panel)}
+#flux .verify a:hover{border-color:var(--turbine)}
+#flux .verify a span{color:var(--dim);display:block;font-size:9px;letter-spacing:.09em;
+  text-transform:uppercase;margin-top:2px}
+#flux .searchall{display:block;background:var(--amber);color:#052026;border:1px solid var(--amber);
+  border-radius:4px;padding:8px 10px;font-family:var(--mono);font-size:10.5px;font-weight:600;
+  letter-spacing:.06em;text-decoration:none;text-align:center;margin-bottom:6px}
+#flux .searchall:hover{background:#F2BC5E;border-color:#F2BC5E}
+#flux .searchall span{display:block;font-weight:400;font-size:9px;letter-spacing:.08em;
+  text-transform:uppercase;opacity:.72;margin-top:2px}
+#flux .srcgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+#flux .srcgrid a{font-family:var(--mono);font-size:10px;color:var(--muted);text-decoration:none;
+  border:1px solid var(--rule-soft);border-radius:4px;padding:6px 7px;background:var(--panel);
+  text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#flux .srcgrid a:hover{color:var(--turbine);border-color:var(--turbine)}
+
+#flux .diary{border-top:1px solid var(--rule-soft);margin-top:24px;padding-top:14px}
+#flux .diary ol{list-style:none;margin:0;padding:0}
+#flux .diary li{display:grid;grid-template-columns:54px 1fr;gap:10px;padding:7px 0;
+  border-bottom:1px dotted var(--rule-soft)}
+#flux .diary li:last-child{border-bottom:none}
+#flux .d-when{font-family:var(--mono);font-size:10px;color:var(--amber);line-height:1.35;padding-top:1px}
+#flux .d-what{font-size:11.5px;line-height:1.4;color:var(--muted)}
+#flux .d-what b{color:var(--text);font-family:var(--cond);font-weight:700;font-size:12px}
+#flux .diary li.past .d-when{color:var(--dim)}
+#flux .diary li.past .d-what{opacity:.5}
+
+#flux .feedbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  flex-wrap:wrap;padding:11px 22px;border-bottom:1px solid var(--rule);font-family:var(--mono);
+  font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+#flux .views{display:flex;gap:5px}
+#flux .view-btn{background:transparent;border:1px solid var(--rule);color:var(--muted);
+  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px}
+#flux .view-btn[aria-pressed="true"]{background:var(--rule);color:var(--text);border-color:var(--dim)}
+
+#flux .story{display:grid;grid-template-columns:70px 1fr;gap:0 16px;padding:16px 22px;
+  border-bottom:1px solid var(--rule-soft);position:relative}
+#flux .story:hover{background:#0C222A}
+#flux .story::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:var(--flat);opacity:.35}
+#flux .story.pos::before{background:var(--up);opacity:1}
+#flux .story.neg::before{background:var(--down);opacity:1}
+#flux .gutter{font-family:var(--mono);font-size:10px;color:var(--dim);padding-top:3px}
+#flux .g-sym{display:block;font-family:var(--cond);font-weight:700;font-size:14px;
+  color:var(--turbine);margin-bottom:3px}
+#flux .g-ago{display:block;color:var(--muted)}
+#flux .headline{font-family:var(--cond);font-weight:600;font-size:18.5px;line-height:1.28;margin:0 0 5px}
+#flux .headline a{color:var(--text);text-decoration:none;border-bottom:1px solid transparent}
+#flux .headline a:hover{border-bottom-color:var(--turbine)}
+#flux .summary{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55}
+#flux .meta{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-top:9px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+#flux .meter{display:flex;gap:2px}
+#flux .meter i{width:9px;height:8px;background:var(--rule);border-radius:1px}
+#flux .meter i.on{background:var(--amber)}
+#flux .cat{border:1px solid var(--rule);padding:2px 6px;border-radius:3px;color:var(--muted)}
+#flux .src{color:var(--muted);text-transform:none;letter-spacing:.02em;font-size:10.5px}
+#flux .tag-live{color:#052026;background:var(--turbine);padding:2px 6px;border-radius:3px;font-weight:600}
+#flux .open{color:var(--turbine);text-decoration:none}
+#flux .open:hover{text-decoration:underline}
+
+/* ---------- dividende ---------- */
+#flux .div-top{padding:18px 22px;border-bottom:1px solid var(--rule);background:var(--panel);
+  display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+#flux .div-top .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim);margin:0 0 4px}
+#flux .div-big{font-family:var(--cond);font-weight:700;font-size:32px;line-height:1;
+  letter-spacing:-.02em;color:var(--amber)}
+#flux .div-big small{font-size:15px;color:var(--muted);font-weight:600;margin-left:5px}
+#flux .div-hint{font-size:12px;color:var(--muted);max-width:330px;line-height:1.5}
+
+#flux .divblock{border-bottom:1px solid var(--rule-soft);padding:15px 22px}
+#flux .divhead{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  flex-wrap:wrap;margin-bottom:11px}
+#flux .divhead .who{display:flex;align-items:baseline;gap:10px}
+#flux .divhead .s{font-family:var(--cond);font-weight:700;font-size:19px;color:var(--turbine)}
+#flux .divhead .n{font-family:var(--mono);font-size:10px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--dim)}
+#flux .shares{display:flex;align-items:center;gap:8px}
+#flux .shares label{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--dim)}
+#flux .shares input{width:104px;background:var(--ink);border:1px solid var(--rule);
+  color:var(--text);font-family:var(--mono);font-size:12.5px;padding:6px 9px;border-radius:4px;
+  text-align:right}
+#flux .shares input:focus{border-color:var(--turbine);outline:none}
+
+#flux .drow{display:grid;grid-template-columns:1fr 128px 108px 128px;gap:12px;align-items:baseline;
+  padding:9px 0;border-top:1px dotted var(--rule-soft)}
+#flux .dname{font-size:13.5px;color:var(--text)}
+#flux .dname em{font-style:normal;display:block;font-family:var(--mono);font-size:10px;
+  color:var(--dim);letter-spacing:.04em;margin-top:2px}
+#flux .dval{font-family:var(--mono);font-size:12.5px;color:var(--muted);text-align:right}
+#flux .dval b{color:var(--text);font-weight:500}
+#flux .ddate{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right;line-height:1.4}
+#flux .ddate span{display:block;color:var(--dim);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase}
+#flux .dyou{text-align:right;font-family:var(--mono);font-size:12.5px}
+#flux .dyou b{color:var(--amber);font-weight:600}
+#flux .dyou span{display:block;color:var(--dim);font-size:9.5px;letter-spacing:.06em;
+  text-transform:uppercase;margin-top:1px}
+#flux .dstate{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.09em;
+  text-transform:uppercase;padding:2px 6px;border-radius:3px;margin-left:8px;vertical-align:1px}
+#flux .dstate.platit{background:var(--rule);color:var(--muted)}
+#flux .dstate.urmeaza{background:var(--amber);color:#052026;font-weight:600}
+#flux .dstate.propus{border:1px solid var(--dim);color:var(--muted)}
+#flux .dnote{grid-column:1/-1;font-size:12px;color:var(--muted);line-height:1.5;padding-top:2px}
+#flux .dnote a{color:var(--turbine);text-decoration:none}
+#flux .dnote a:hover{text-decoration:underline}
+
+#flux .banner{padding:12px 22px;border-bottom:1px solid var(--rule-soft);font-size:12.5px;
+  color:var(--muted);line-height:1.55;background:var(--panel)}
+#flux .banner b{color:var(--text)}
+#flux .banner.warn{border-left:3px solid var(--amber)}
+#flux .banner.ok{border-left:3px solid var(--up)}
+
+#flux .empty{padding:52px 22px;text-align:center;color:var(--muted);max-width:460px;margin:0 auto}
+#flux .empty h3{font-family:var(--cond);font-weight:600;font-size:19px;color:var(--text);margin:0 0 8px}
+#flux .empty p{margin:0;font-size:13.5px;line-height:1.6}
+#flux .foot{padding:14px 22px;border-top:1px solid var(--rule);font-family:var(--mono);
+  font-size:9.5px;letter-spacing:.05em;color:var(--dim);line-height:1.75}
+
+@media (max-width:880px){
+  #flux .stage{grid-template-columns:1fr}
+  #flux .rail{border-right:none;border-bottom:1px solid var(--rule)}
+  #flux .ticks{display:grid;grid-template-columns:repeat(auto-fit,minmax(124px,1fr));gap:6px}
+  #flux .tick{margin-bottom:0}
+  #flux .story{grid-template-columns:1fr;padding:15px 16px}
+  #flux .gutter{display:flex;gap:9px;align-items:baseline;margin-bottom:6px;padding-top:0}
+  #flux .g-sym{margin-bottom:0}
+  #flux .masthead,#flux .feedbar,#flux .banner,#flux .divblock,#flux .div-top{padding-left:16px;padding-right:16px}
+  #flux .headline{font-size:17px}
+  #flux .drow{grid-template-columns:1fr 1fr;gap:6px 12px}
+  #flux .dname{grid-column:1/-1}
+  #flux .dval,#flux .ddate,#flux .dyou{text-align:left}
+}
+</style>
+
+<div id="flux">
+  <header class="masthead">
+    <div class="brand">
+      <h1 class="wordmark">Flux<em>.</em></h1>
+      <span class="eyebrow">Bursa de Valori București &middot; cinci dețineri</span>
+    </div>
+    <div class="masthead-right">
+      <span class="stamp" id="stamp">Situație la <b>6 aug. 2026</b></span>
+      <button class="btn-ghost" id="copy">Copiază cererea</button>
+      <button class="btn" id="live">Știri live ↗</button>
+    </div>
+  </header>
+
+  <div class="stage">
+    <aside class="rail">
+      <p class="rail-label">Dețineri</p>
+      <div class="ticks" id="ticks"></div>
+
+      <div class="rail-block" id="cats-block">
+        <p class="rail-label">Subiect</p>
+        <div class="chips" id="cats"></div>
+      </div>
+
+      <div class="rail-block">
+        <p class="rail-label" id="verify-label">Verifică la sursă</p>
+        <div class="verify" id="verify"></div>
+      </div>
+
+      <div class="diary">
+        <p class="rail-label">Termene de urmărit</p>
+        <ol id="diary"></ol>
+      </div>
+    </aside>
+
+    <section class="main">
+      <div id="banner"></div>
+      <div class="feedbar">
+        <div class="views">
+          <button class="view-btn" data-view="stiri" aria-pressed="true">Știri</button>
+          <button class="view-btn" data-view="div" aria-pressed="false">Dividende</button>
+        </div>
+        <span id="count"></span>
+      </div>
+      <div id="feed"></div>
+    </section>
+  </div>
+
+  <footer class="foot">
+    Sinteză documentată pe 6 august 2026, din rapoarte BVB și presa financiară românească. Sumele nete sunt
+    calculate cu impozitul standard de 16% reținut la sursă; cota ta poate diferi. Nu este consultanță de
+    investiții sau fiscală. Surse urmărite: bvb.ro, zf.ro, bursa.ro, profit.ro, wall-street.ro,
+    tradeville.ro, forbes.ro și primet.ro. Verifică întotdeauna comunicatul emitentului prin linkurile
+    „Verifică la sursă” din stânga.
+  </footer>
+</div>
+
+<script id="flux-data">window.FLUX_DATA=null;/*__FLUX_DATA__*/</script>
+<script>
+(function(){
+  var TAX=0.16;
+  var TICKERS=[
+    {s:"H2O",name:"Hidroelectrica",   q:"Hidroelectrica",       bvb:"H2O",tv:"H2O",pm:"h2o"},
+    {s:"FP", name:"Fondul Proprietatea",q:"Fondul Proprietatea",bvb:"FP", tv:"FP", pm:"fp"},
+    {s:"TLV",name:"Banca Transilvania",q:"Banca Transilvania",  bvb:"TLV",tv:"TLV",pm:"tlv"},
+    {s:"SNP",name:"OMV Petrom",       q:"OMV Petrom",           bvb:"SNP",tv:"SNP",pm:"snp"},
+    {s:"SNG",name:"Romgaz",           q:"Romgaz",               bvb:"SNG",tv:"SNG",pm:"sng"}
+  ];
+  var CATS=["Rezultate","Dividende","Reglementare","Tranzacții","Analiză","Operațional","Guvernanță","Piață"];
+
+  /* ============ DIVIDENDE 2026 ============ */
+  var DIV=[
+    {t:"H2O",nume:"Dividend de bilanț 2025",brut:7.348365,total:"3,31 mld. lei",
+     ex:"2026-06-03",inreg:"2026-06-04",plata:"2026-06-25",stare:"platit",
+     nota:"Aproape tot profitul net pe 2025, de 3,37 mld. lei. Statul a încasat circa 2,64 mld. lei, pe participația de 80,06%. Comisioanele BRD și Depozitarul Central sunt suportate de companie.",
+     u:"https://www.economica.net/hidroelectrica-incepe-plata-dividendelor-pentru-anul-2025-ce-trebuie-sa-stie-si-sa-faca-actionarii_943916.html"},
+    {t:"H2O",nume:"Dividend special",brut:2.223197,total:"1,00 mld. lei",
+     ex:"2026-09-08",inreg:"2026-09-09",plata:"2026-09-30",stare:"urmeaza",
+     nota:"Din surplusul realizat din rezerve din reevaluare, aprobat în AGOA din 29 mai. Statul primește circa 800,5 mil. lei.",
+     u:"https://www.zf.ro/burse-fonduri-mutuale/unda-verde-de-la-actionarii-hidroelectrica-pentru-dividende-speciale-23163317"},
+
+    {t:"TLV",nume:"Dividend din profitul 2025",brut:1.2840240875,total:"1,40 mld. lei",
+     ex:"2026-06-15",inreg:"2026-06-16",plata:"2026-06-30",stare:"platit",
+     nota:"Circa 34% din profitul net de 4,095 mld. lei. Titularii de cont la BT au primit banii prin virament automat.",
+     u:"https://www.bancatransilvania.ro/relatii-investitori/faq"},
+    {t:"TLV",nume:"Acțiuni gratuite (nu numerar)",brut:0,total:"157,26 mil. acțiuni",
+     ex:"2026-07-16",inreg:"2026-07-17",plata:"2026-07-20",stare:"platit",
+     nota:"Majorare de capital cu 1,57 mld. lei din rezerve: circa 14,42 acțiuni noi la fiecare 100 deținute. Nu intră în calculul de mai jos, fiindcă nu e o plată în bani.",
+     u:"https://www.zf.ro/burse-fonduri-mutuale/banca-transilvania-imparte-1-4-miliarde-de-lei-ca-dividende-si-emite-23141537"},
+    {t:"TLV",nume:"Posibil dividend special de toamnă",brut:0,total:"~700 mil. lei",
+     ex:"",inreg:"",plata:"",stare:"propus",
+     nota:"Circa 700 mil. lei au rămas nedistribuite din profitul 2025. Omer Tetik a spus că acționarii vor fi întrebați dacă performanța se menține. Nimic aprobat încă.",
+     u:"https://www.zf.ro/burse-fonduri-mutuale/bursa-dividende-speciale-700-mil-lei-banca-transilvania-toamna-omer-23161709"},
+
+    {t:"SNP",nume:"Dividend de bază 2025",brut:0.0466,total:"~2,90 mld. lei",
+     ex:"2026-05-14",inreg:"2026-05-15",plata:"2026-06-08",stare:"platit",
+     nota:"În creștere cu 5% față de anul anterior, în linie cu ținta de majorare graduală de 5-10% pe an până în 2030.",
+     u:"https://www.bursa.ro/omv-petrom-aloca-un-dividend-cu-randament-net-de-5-procente-49889857"},
+    {t:"SNP",nume:"Dividend special",brut:0.0112,total:"~700 mil. lei",
+     ex:"2026-05-14",inreg:"2026-05-15",plata:"2026-06-08",stare:"platit",
+     nota:"În scădere cu 44% față de anul trecut. Împreună cu cel de bază, 0,0578 lei brut și circa 3,6 mld. lei total — peste profitul net pe 2025, diferența acoperită din rezerve.",
+     u:"https://www.zf.ro/burse-fonduri-mutuale/premiera-la-omv-petrom-compania-propune-pentru-2026-dividende-totale-23038781"},
+
+    {t:"SNG",nume:"Dividend din profitul 2025 și rezultat reportat",brut:0.1572,total:"605,9 mil. lei",
+     ex:"2026-07-06",inreg:"2026-07-07",plata:"2026-07-28",stare:"platit",
+     nota:"592,78 mil. lei din profitul anului plus 13,10 mil. din rezultatul reportat. Doar circa 18% rată de distribuire, pe fondul investițiilor în Neptun Deep. Statul a primit 424,17 mil. lei.",
+     u:"https://www.bursa.ro/romgaz-propune-dividende-de-circa-600-milioane-lei-62067858"},
+
+    {t:"FP",nume:"Propunere respinsă (fonduri slovene)",brut:0,total:"145 mil. lei",
+     ex:"",inreg:"",plata:"",stare:"respins",
+     nota:"0,0453 lei brut pe acțiune, propus de Equinox, Axor Holding și Intus Invest. Respins de acționari în AGOA din 23 iulie.",
+     u:"https://financialintelligence.ro/fondul-proprietatea-redeschide-selectia-viitorului-administrator-actionarii-au-respins-dividendul-propus-si-revocarea-a-doi-membri-ai-comitetului-reprezentantilor/"},
+    {t:"FP",nume:"Propunere Lion Capital",brut:0.046,total:"~147 mil. lei",
+     ex:"",inreg:"",plata:"",stare:"propus",
+     nota:"Cerută pe 31 iulie de acționarul cu 11,274%. Randament de circa 7,6% la prețul de 0,603 lei. Franklin Templeton a confirmat condițiile legale de convocare, dar data AGOA nu e stabilită. Sumele de mai jos sunt orientative.",
+     u:"https://www.zf.ro/burse-fonduri-mutuale/lion-capital-vrea-dividende-de-0-046-lei-de-la-fondul-proprietatea-randament-de-7-7-23207019"}
+  ];
+
+  var BRIEF=[
+    /* ================= H2O ================= */
+    {t:"H2O",d:"2026-08-06",h:"Acțiunile pierd 4% într-o ședință de scădere generală",
+     s:"Bursa a coborât cu 1,7% joi, iar Hidroelectrica a fost printre cele mai lovite, alături de Digi (-3%), Cris-Tim și Premier Energy (câte -2%).",
+     src:"Ziarul Financiar",c:"Piață",sent:"negative",i:4,
+     u:"https://www.zf.ro/burse-fonduri-mutuale/bursa-de-valori-in-scadere-cu-1-7-joi-hidroelectrica-pierde-4-digi-3-iar-cris-tim-si-premier-energy-cate-2-23211174"},
+    {t:"H2O",d:"2026-08-05",h:"Raportul pe S1 2026 și teleconferința, anunțate",
+     s:"Hidroelectrica a transmis la BVB disponibilitatea raportului pe primul semestru, împreună cu detaliile teleconferinței cu analiștii.",
+     src:"Raport BVB",c:"Rezultate",sent:"neutral",i:4,
+     u:"https://www.primet.ro/informatii-piata-cotatii-bursa?simbol=h2o"},
+    {t:"H2O",d:"2026-08-05",h:"Coboară la 193 lei, cu 13,9 mil. lei rulaj",
+     s:"H2O a scăzut cu 1,53%, trăgând indicele energetic BET-NG cu 0,26% în jos.",
+     src:"Bursa.ro",c:"Piață",sent:"negative",i:2,
+     u:"https://www.bursa.ro/bvb-scaderi-pe-linie-pentru-indici-84597959"},
+    {t:"H2O",d:"2026-08-01",h:"Presiune de vânzare la începutul lunii august",
+     s:"Acțiunile pierdeau 0,91% în deschidere, a doua ședință consecutivă pe minus, alături de Nuclearelectrica și Romgaz.",
+     src:"Săptămâna Financiară",c:"Piață",sent:"negative",i:2,
+     u:"https://www.sfin.ro/bursa-bucuresti-incepe-august-pe-plus-actiuni-sub-presiune/"},
+    {t:"H2O",d:"2026-07-30",h:"Hotărârile AGEA și AGOA din 30 iulie, depuse la bursă",
+     s:"Ambele adunări generale desfășurate pe 30 iulie și-au transmis hotărârile către Bursa de Valori București.",
+     src:"Raport BVB",c:"Guvernanță",sent:"neutral",i:3,
+     u:"https://www.primet.ro/informatii-piata-cotatii-bursa?simbol=h2o"},
+    {t:"H2O",d:"2026-07-30",h:"Undă verde pentru angajări la uzina de la Reșița",
+     s:"Guvernul a permis Hidroelectrica să reia recrutările la uzina proprie de construcții de mașini de la Reșița.",
+     src:"Prime Transaction",c:"Operațional",sent:"neutral",i:2,
+     u:"https://www.primet.ro/informatii-piata-cotatii-bursa?simbol=h2o"},
+    {t:"H2O",d:"2026-07-29",h:"Clarificări privind informațiile apărute în spațiul public",
+     s:"Compania a transmis un raport curent prin care clarifică informațiile care circulaseră public despre activitatea sa.",
+     src:"Raport BVB",c:"Guvernanță",sent:"neutral",i:2,
+     u:"https://www.primet.ro/informatii-piata-cotatii-bursa?simbol=h2o"},
+    {t:"H2O",d:"2026-07-28",h:"O analiză indică o supraevaluare de circa 37%",
+     s:"Un preț țintă de 127,2 lei implică o ajustare de circa 37%. Investițiile în retehnologizare și stocare limitează randamentul dividendului la 4,0-4,1% în 2026-2030.",
+     src:"Business24",c:"Analiză",sent:"negative",i:4,
+     u:"https://business24.ro/hidroelectrica/randament-dividend-hidroelectrica-pret-actual-1662004"},
+    {t:"H2O",d:"2026-07-06",h:"Calendar financiar 2026 modificat",
+     s:"Compania a transmis la bursă o modificare a calendarului de raportare pentru acest an.",
+     src:"Raport BVB",c:"Guvernanță",sent:"neutral",i:1,
+     u:"https://www.primet.ro/informatii-piata-cotatii-bursa?simbol=h2o"},
+    {t:"H2O",d:"2026-07-03",h:"Preț-record de 220 lei într-o ședință cu salt de 6%",
+     s:"Titlurile au închis la maximul istoric pe volume de 27,84 mil. lei, trăgând în sus principalii indici ai bursei.",
+     src:"Profit.ro",c:"Piață",sent:"positive",i:3,
+     u:"https://www.profit.ro/povesti-cu-profit/financiar/piata-de-capital/grafic-hidroelectrica-la-pret-record-bursa-incheie-o-saptamana-de-tranzactionare-in-care-toate-sedintele-au-fost-de-crestere-22504498"},
+    {t:"H2O",d:"2026-06-25",h:"Plata dividendului de bilanț, 7,348365 lei pe acțiune",
+     s:"Distribuirea a început pe 25 iunie, către acționarii înregistrați la 4 iunie. Dreptul se prescrie pe 25 iunie 2029.",
+     src:"Economica.net",c:"Dividende",sent:"positive",i:4,
+     u:"https://www.economica.net/hidroelectrica-incepe-plata-dividendelor-pentru-anul-2025-ce-trebuie-sa-stie-si-sa-faca-actionarii_943916.html"},
+    {t:"H2O",d:"2026-05-29",h:"Dividend special de 1 mld. lei, cu plata pe 30 septembrie",
+     s:"Brut 2,223197 lei pe acțiune, din surplusul din rezerve din reevaluare. Ex-date 8 septembrie. Statul încasează circa 800,5 mil. lei.",
+     src:"Ziarul Financiar",c:"Dividende",sent:"positive",i:5,
+     u:"https://www.zf.ro/burse-fonduri-mutuale/unda-verde-de-la-actionarii-hidroelectrica-pentru-dividende-speciale-23163317"},
+    {t:"H2O",d:"2026-05-29",h:"Mandat suspendat în Consiliul de Supraveghere",
+     s:"Acționarii au constatat suspendarea mandatului lui Silviu Răzvan Avram, pe fondul unui dosar de luare de mită aflat pe rolul Curții de Apel București.",
+     src:"Forbes România",c:"Guvernanță",sent:"negative",i:2,
+     u:"https://www.forbes.ro/hidroelectrica-distribuie-dividende-suplimentare-de-1-miliard-de-lei-si-aproba-bugetul-pe-2026-504162"},
+    {t:"H2O",d:"2026-05-22",h:"Profitul din T1 se mai mult decât dublează",
+     s:"Profit net +122%, la 1,3 mld. lei, venituri +67%, la 3,12 mld. lei. Marja EBITDA a urcat de la 46% la 55%, cu producția în creștere cu 36% pe debitul mai mare al Dunării.",
+     src:"Tradeville / ZF",c:"Rezultate",sent:"positive",i:5,
+     u:"https://tradeville.ro/actiuni/H2O/stiri"},
+    {t:"H2O",d:"2026-05-20",h:"Strategia 2027-2030 țintește 6.000 MWh în baterii",
+     s:"Planul adaugă până la 1.500 MW stocare și peste 2.500 MW regenerabile noi, cu remunerarea directorilor corelată de îndeplinirea țintelor.",
+     src:"Tradeville",c:"Operațional",sent:"neutral",i:3,
+     u:"https://tradeville.ro/actiuni/H2O/stiri"},
+    {t:"H2O",d:"2026-03-30",h:"Aproape tot profitul pe 2025 merge în dividende",
+     s:"Din 3,37 mld. lei profit net se distribuie circa 3,3 mld. lei, din care 2,64 mld. către stat, pe participația de 80% a Ministerului Energiei.",
+     src:"Curs de Guvernare",c:"Dividende",sent:"neutral",i:4,
+     u:"https://cursdeguvernare.ro/dividende-hidroelectrica-miliarde-statul-actiuni.html"},
+    {t:"H2O",d:"2026-02-06",h:"Guvernul cere 90% din profitul companiilor de stat",
+     s:"Politica de dividende a statului rămâne principalul factor extern pentru repartizarea profitului la Hidroelectrica, Romgaz și celelalte companii controlate public.",
+     src:"Goldring",c:"Reglementare",sent:"negative",i:3,
+     u:"https://www.goldring.ro/trendul-zilei/hidroelectrica-recucereste-pozitia-de-lider-la-bvb-depasind-petrom"},
+
+    /* ================= FP ================= */
+    {t:"FP",d:"2026-07-31",h:"Lion Capital cere un dividend de 0,046 lei, randament 7,6%",
+     s:"Acționarul cu 11,274% a cerut Franklin Templeton convocarea unei AGOA, la opt zile după respingerea unei propuneri similare. Ar însemna circa 147 mil. lei. Data adunării nu e stabilită.",
+     src:"Ziarul Financiar",c:"Dividende",sent:"positive",i:5,
+     u:"https://www.zf.ro/burse-fonduri-mutuale/lion-capital-vrea-dividende-de-0-046-lei-de-la-fondul-proprietatea-randament-de-7-7-23207019"},
+    {t:"FP",d:"2026-07-31",h:"Acțiunile se tranzacționează cu un discount de o treime față de VAN",
+     s:"La 0,603 lei, valoarea de piață a Fondului este de circa 1,9 mld. lei, față de un activ net unitar de 0,9058 lei pe acțiune raportat la 30 iunie.",
+     src:"Ziarul Financiar",c:"Analiză",sent:"neutral",i:4,
+     u:"https://www.zf.ro/burse-fonduri-mutuale/lion-capital-vrea-dividende-de-0-046-lei-de-la-fondul-proprietatea-randament-de-7-7-23207019"},
+    {t:"FP",d:"2026-07-31",h:"Franklin Templeton confirmă condițiile legale pentru convocare",
+     s:"Administratorul a verificat documentele-suport și a constatat că sunt îndeplinite condițiile pentru convocarea AGOA la cererea unui acționar cu peste 5% din capital.",
+     src:"Ziarul Financiar",c:"Guvernanță",sent:"neutral",i:3,
+     u:"https://www.zf.ro/burse-fonduri-mutuale/lion-capital-vrea-dividende-de-0-046-lei-de-la-fondul-proprietatea-randament-de-7-7-23207019"},
+    {t:"FP",d:"2026-07-27",h:"Selecția administratorului, redeschisă către noi candidați",
+     s:"Comitetul Reprezentanților, prezidat de Ștefan Nanu, a redeschis selecția pentru AFIA și administrator unic, cu un buget plafonat la 1,5 mil. lei.",
+     src:"Economedia",c:"Guvernanță",sent:"neutral",i:4,
+     u:"https://economedia.ro/fondul-proprietatea-redeschide-competitia-pentru-desemnarea-unui-nou-administrator.html"},
+    {t:"FP",d:"2026-07-27",h:"INVL și Muntenia Invest intră în cursa pentru mandat",
+     s:"Administratorul baltic INVL candidează alături de Impetum Management, iar SAI Muntenia Invest s-a înscris pe fondul creșterii Lion Capital peste 10% din FP.",
+     src:"Economedia",c:"Tranzacții",sent:"neutral",i:3,
+     u:"https://economedia.ro/fondul-proprietatea-redeschide-competitia-pentru-desemnarea-unui-nou-administrator.html"},
+    {t:"FP",d:"2026-07-23",h:"Acționarii resping dividendul propus de fondurile slovene",
+     s:"Propunerea Equinox, Axor Holding și Intus Invest, de 0,0453 lei brut pe acțiune, a fost respinsă. A fost aprobată în schimb reducerea capitalului cu 131,09 mil. lei.",
+     src:"Financial Intelligence",c:"Dividende",sent:"negative",i:5,
+     u:"https://financialintelligence.ro/fondul-proprietatea-redeschide-selectia-viitorului-administrator-actionarii-au-respins-dividendul-propus-si-revocarea-a-doi-membri-ai-comitetului-reprezentantilor/"},
+    {t:"FP",d:"2026-07-23",h:"Revocarea a doi membri ai Comitetului Reprezentanților, respinsă",
+     s:"Adunarea a respins și propunerea de înlocuire a doi membri din Comitetul Reprezentanților.",
+     src:"Financial Intelligence",c:"Guvernanță",sent:"neutral",i:3,
+     u:"https://financialintelligence.ro/fondul-proprietatea-redeschide-selectia-viitorului-administrator-actionarii-au-respins-dividendul-propus-si-revocarea-a-doi-membri-ai-comitetului-reprezentantilor/"},
+    {t:"FP",d:"2026-07-16",h:"Persoanele fizice române dețin 42% din fond",
+     s:"La data de referință 8 iulie: persoane fizice 42,48%, persoane juridice române 22,84%, acțiuni proprii 7,88%, fără drept de vot.",
+     src:"Raport BVB",c:"Guvernanță",sent:"neutral",i:1,
+     u:"https://www.bvb.ro/infocont/infocont26/FP_20260716155606_Raport-curent-structura-actionariat-la-8-iulie-2026---data-r.pdf"},
+    {t:"FP",d:"2026-06-12",h:"Reevaluarea Salrom, semnalată în raportul VAN pe mai",
+     s:"Evaluarea Salrom a fost actualizată pentru prima dată din 2020. Bugetul 2026-2028 indică o deteriorare a profitabilității operaționale, cu efect asupra VAN din iunie.",
+     src:"Raport BVB",c:"Operațional",sent:"negative",i:3,
+     u:"https://www.bvb.ro/infocont/infocont26/FP_20260612154405_Raport-VAN-31-mai-2026.pdf"},
+    {t:"FP",d:"2026-05-28",h:"Franklin Templeton rămâne administrator interimar",
+     s:"Adunarea din martie a decis ca Franklin Templeton, administrator din 2010, să rămână pe poziție interimar cât timp procesul de selecție se prelungește.",
+     src:"Fondul Proprietatea",c:"Guvernanță",sent:"neutral",i:3,
+     u:"https://m.bvb.ro/infocont/infocont26/FP_20260528210528_Raport-rezultate-T1-2026.pdf"},
+    {t:"FP",d:"2026-05-28",h:"Evaluarea CNAB, blocată de incertitudinea unei tranzacții",
+     s:"Fondul a concluzionat că la 31 martie nu existau suficiente informații despre momentul și structura unei potențiale tranzacții pentru a ajusta evaluarea.",
+     src:"Raport BVB",c:"Operațional",sent:"neutral",i:2,
+     u:"https://m.bvb.ro/infocont/infocont26/FP_20260528210528_Raport-rezultate-T1-2026.pdf"},
+    {t:"FP",d:"2026-03-12",h:"Calendar financiar 2026 actualizat",
+     s:"Fondul a transmis la bursă versiunea actualizată a calendarului de raportare pentru acest an.",
+     src:"Raport BVB",c:"Guvernanță",sent:"neutral",i:1,
+     u:"https://bvb.ro/FinancialInstruments/SelectedData/NewsItem/FP-Calendar-financiar-2026-actualizat-pentru-Fondul-Proprietatea-S-A-/2E1B1"},
+
+    /* ================= TLV ================= */
+    {t:"TLV",d:"2026-08-06",h:"Cel mai mare rulaj al zilei, pe scădere de 0,95%",
+     s:"Titlurile au condus lichiditatea cu 25,1 mil. lei și au închis la 37,5 lei.",
+     src:"Bursa.ro",c:"Piață",sent:"negative",i:2,
+     u:"https://www.bursa.ro/bvb-scaderi-pe-linie-pentru-indici-84597959"},
+    {t:"TLV",d:"2026-08-05",h:"Lider de lichiditate și în ședința precedentă",
+     s:"Rulaj de 26,5 mil. lei și o închidere la 37,86 lei, în creștere cu 0,21%.",
+     src:"Bursa.ro",c:"Piață",sent:"neutral",i:1,
+     u:"https://www.bursa.ro/bvb-deprecieri-pentru-majoritatea-indicilor-45387957"},
+    {t:"TLV",d:"2026-07-20",h:"Distribuirea acțiunilor gratuite, circa 14 la 100",
+     s:"157,26 mil. acțiuni noi emise prin încorporarea rezervelor, cu ex-date 16 iulie și data de înregistrare 17 iulie.",
+     src:"Ziarul Financiar",c:"Dividende",sent:"positive",i:4,
+     u:"https://www.zf.ro/burse-fonduri-mutuale/banca-transilvania-imparte-1-4-miliarde-de-lei-ca-dividende-si-emite-23141537"},
+    {t:"TLV",d:"2026-06-30",h:"Plata dividendului de 1,284 lei pe acțiune",
+     s:"Virament automat pentru titularii de cont BT. Dreptul de a solicita plata expiră pe 30 iunie 2029.",
+     src:"Banca Transilvania",c:"Dividende",sent:"positive",i:4,
+     u:"https://www.zf.ro/info/comunicat-de-presa-data-platii-dividendelor-aprobate-iunie-2026-23180177"},
+    {t:"TLV",d:"2026-06-22",h:"Consiliul Concurenței își menține decizia pe ROBOR",
+     s:"Autoritatea a reafirmat că regulile au fost încălcate atât la nivel național, cât și european, prin schimb de informații confidențiale în perioada de fixing.",
+     src:"Digi24",c:"Reglementare",sent:"negative",i:3,
+     u:"https://www.digi24.ro/digieconomic/financiar/consiliul-concurentei-contrazice-bancile-in-cazul-amenzilor-robor-regulile-au-fost-incalcate-atat-la-nivel-national-cat-si-european-106733"},
+    {t:"TLV",d:"2026-06-08",h:"BT avertizează că amenzile pot reduce creditarea cu 5 mld. euro",
+     s:"Banca a calificat decizia drept arbitrară și nefondată și a anunțat contestație la Curtea de Apel București. Amenda cumulată este de 960,77 mil. lei.",
+     src:"Ziarul Financiar",c:"Reglementare",sent:"negative",i:4,
+     u:"https://www.zf.ro/banci-si-asigurari/banca-transilvania-avertizeaza-amenzile-dosarul-robor-pot-reduce-23169515"},
+    {t:"TLV",d:"2026-06-07",h:"Cea mai mare amendă din istoria Concurenței revine BT",
+     s:"875,74 mil. lei în nume propriu, plus 85,03 mil. lei pentru OTP Bank România, dintr-un total de 3,73 mld. lei aplicat celor zece bănci din panelul ROBOR.",
+     src:"Economica.net",c:"Reglementare",sent:"negative",i:5,
+     u:"https://www.economica.net/foto-cea-mai-mare-amenda-din-romania-pe-cazul-robor-acuzatii-grave-ale-sefului-banca-transilvania-liderul-sistemului-submineaza-economia-vom-contesta-decizia_948376.html"},
+    {t:"TLV",d:"2026-06-07",h:"Tetik: decizia încurajează populismul",
+     s:"CEO-ul a reacționat pe LinkedIn, spunând că investigația arată o lipsă de înțelegere a sistemului financiar și că banca își va dovedi nevinovăția.",
+     src:"Profit.ro",c:"Guvernanță",sent:"negative",i:3,
+     u:"https://www.profit.ro/povesti-cu-profit/financiar/reactia-bancii-transilvania-marea-amenda-robor-omer-tetik-investigatia-dovedeste-profunda-lipsa-intelegere-functionarii-sistemului-financiar-incurajeaza-populismul-submineaza-economia-22471804"},
+    {t:"TLV",d:"2026-05-28",h:"Dividend special de 700 mil. lei, posibil în toamnă",
+     s:"Tetik: dacă performanța continuă și indicatorii se îmbunătățesc, acționarii vor fi întrebați. Ar însemna un randament suplimentar de circa 1,7%.",
+     src:"Ziarul Financiar",c:"Dividende",sent:"positive",i:4,
+     u:"https://www.zf.ro/burse-fonduri-mutuale/bursa-dividende-speciale-700-mil-lei-banca-transilvania-toamna-omer-23161709"},
+    {t:"TLV",d:"2026-05-27",h:"Acțiunile se apropie de maximul istoric după rezultate",
+     s:"TLV s-a apropiat de vârful de 39,36 lei din 15 mai, închizând plat la 38,64 lei, cu un plus de aproape 59% în douăsprezece luni.",
+     src:"Bursa.ro",c:"Piață",sent:"positive",i:2,
+     u:"https://www.bursa.ro/tradeville-banca-transilvania-accelereaza-cresterea-03161955"},
+    {t:"TLV",d:"2026-05-22",h:"Profitul din T1 crește cu 30%, la 1,14 mld. lei",
+     s:"Venitul net din dobânzi +8,7%, la 1,67 mld. lei, comisioanele +12,9%. ROE 19,54%, rata NPL 2,55%, solvabilitate 20,65%, active de 227 mld. lei.",
+     src:"Ziarul Financiar",c:"Rezultate",sent:"positive",i:5,
+     u:"https://www.zf.ro/zf-24/banca-transilvania-profit-1-1-mld-lei-t1-2026-mare-30-sustinut-23157377"},
+    {t:"TLV",d:"2026-05-18",h:"Fitch urcă ratingul la BBB, peste ratingul suveran",
+     s:"Rar pentru o bancă. Agenția invocă reziliența financiară, capitalizarea și cele aproape 4 mld. euro atrase din 2023 prin șapte emisiuni MREL. Perspectiva rămâne negativă.",
+     src:"Forbes România",c:"Analiză",sent:"positive",i:4,
+     u:"https://www.forbes.ro/fitch-a-imbunatatit-ratingul-bancii-transilvania-la-bbb-peste-ratingul-suveran-al-romaniei-501910"},
+    {t:"TLV",d:"2026-05-15",h:"BERD vinde 1% și coboară sub pragul de 5%",
+     s:"Banca de dezvoltare și-a redus deținerea, ieșind din categoria acționarilor semnificativi raportați.",
+     src:"Goldring",c:"Tranzacții",sent:"neutral",i:3,
+     u:"https://www.goldring.ro/ro/rezultate/dividende/simbol/sng"},
+    {t:"TLV",d:"2026-04-28",h:"Dividend de 1,4 mld. lei și majorare de capital",
+     s:"Din profitul net de 4,095 mld. lei, circa 34% merge la acționari. Horia Ciorcilă a fost reconfirmat președinte pentru mandatul 2026-2030.",
+     src:"Forbes România",c:"Dividende",sent:"positive",i:5,
+     u:"https://www.forbes.ro/banca-transilvania-distribuie-dividende-de-14-miliarde-lei-498656"},
+
+    /* ================= SNP ================= */
+    {t:"SNP",d:"2026-08-06",h:"BT Capital Partners publică nota după rezultatele semestriale",
+     s:"Analiștii diviziei de investment banking a Băncii Transilvania și-au prezentat concluziile pe marginea raportului S1 al companiei.",
+     src:"Ziarul Financiar",c:"Analiză",sent:"neutral",i:3,
+     u:"https://www.zf.ro/burse-fonduri-mutuale/bursa-ce-spun-analistii-bt-capital-partners-dupa-rezultatele-semestriale-ale-omv-petrom-23210905"},
+    {t:"SNP",d:"2026-08-06",h:"Foraj Sonde Videle vrea activitatea de foraj a Transgex Oradea",
+     s:"Tranzacție de 9,5 mil. euro pentru 46 de angajați și contractele cu Romgaz și OMV Petrom. Iulian Stanciu este acționar la cumpărător.",
+     src:"Ziarul Financiar",c:"Tranzacții",sent:"neutral",i:2,
+     u:"https://www.zf.ro/burse-fonduri-mutuale/tranzactie-9-5-mil-euro-foraj-sonde-videle-compania-iulian-stanciu-actionar-vrea-cumpere-activitatea-foraj-transgex-oradea-46-angajati-contractele-romgaz-omv-petrom-23210997"},
+    {t:"SNP",d:"2026-08-05",h:"Urcă 0,87%, la 1,271 lei, pe al doilea rulaj al zilei",
+     s:"Schimburi de 14,7 mil. lei, într-o ședință în care indicii au închis în scădere pe linie.",
+     src:"Bursa.ro",c:"Piață",sent:"positive",i:2,
+     u:"https://www.bursa.ro/bvb-scaderi-pe-linie-pentru-indici-84597959"},
+    {t:"SNP",d:"2026-08-03",h:"Marjele de rafinare rămân puternice până în septembrie",
+     s:"Indicatorul s-a dublat, la 18,4 dolari pe baril în S1 și 22,7 în T2, însă plafonarea marjelor a dus valoarea ajustată ușor sub media din 2025.",
+     src:"Curs de Guvernare",c:"Operațional",sent:"positive",i:4,
+     u:"https://cursdeguvernare.ro/neptun-deep-start-productie-gaze-teleconferinta-analisti-directori-petrom-import-titei.html"},
+    {t:"SNP",d:"2026-08-03",h:"40-45% din țițeiul de la Petrobrazi este din import",
+     s:"Conducerea a evitat să dea o dată exactă pentru primele gaze din Neptun Deep, dar estimează o urcare rapidă spre nivelul de platou după start.",
+     src:"Curs de Guvernare",c:"Operațional",sent:"neutral",i:3,
+     u:"https://cursdeguvernare.ro/neptun-deep-start-productie-gaze-teleconferinta-analisti-directori-petrom-import-titei.html"},
+    {t:"SNP",d:"2026-07-31",h:"Profitul semestrial scade cu 14%, la 1,8 mld. lei",
+     s:"Rezultatul financiar negativ și impozitul de solidaritate au apăsat. Rezultat din exploatare CCA fără elemente speciale 3 mld. lei, investiții 3,7 mld., contribuție la buget 10 mld.",
+     src:"Știrile ProTV",c:"Rezultate",sent:"negative",i:5,
+     u:"https://stirileprotv.ro/stiri/actualitate/profitul-net-al-omv-petrom-a-scazut-cu-14-in-primul-semestru-din-2026-neptun-deep-avanseaza-spre-produc-ia-din-2027.html"},
+    {t:"SNP",d:"2026-07-31",h:"Consensul analiștilor rămâne «hold»",
+     s:"Atenția se îndreaptă spre plafonarea marjelor, contribuția de solidaritate, noua reglementare de la finalul lui iulie și sustenabilitatea remunerării acționarilor.",
+     src:"TrevIQ via Ziare.com",c:"Analiză",sent:"neutral",i:3,
+     u:"https://ziare.com/bursa/treviq-analiza-rezultate-semestriale-s1-2026-2027417"},
+    {t:"SNP",d:"2026-07-31",h:"Statul se împrumută pentru preempțiunea la Neptun Deep",
+     s:"România încearcă să-și exercite dreptul asupra gazelor offshore dorite și de Ungaria, în condițiile în care Administrația Rezervelor de Stat nu are fondurile necesare.",
+     src:"Ziare.com",c:"Reglementare",sent:"neutral",i:4,
+     u:"https://ziare.com/bursa/treviq-analiza-rezultate-semestriale-s1-2026-2027417"},
+    {t:"SNP",d:"2026-07-21",h:"Platforma Neptun Alpha, instalată în Marea Neagră",
+     s:"16.500 de tone și peste 225 de metri înălțime, la circa 120 m adâncime, fixată cu 8 piloni. Șase din zece sonde și conducta de 160 km sunt gata; primele gaze în 2027.",
+     src:"OMV Petrom",c:"Operațional",sent:"positive",i:5,
+     u:"https://www.omvpetrom.com/ro/media/stiri-recente/2026/progres-in-cadrul-proiectului-neptun-deep--platforma-offshore-de-productie-a-fost-instalata-in-marea-neagra"},
+    {t:"SNP",d:"2026-07-21",h:"Sondele Han Asparuh din Bulgaria, fără rezultat",
+     s:"Nu au fost identificate volume semnificative de gaze, dar sondele ajută la înțelegerea geologiei zonei. Petrom a intrat în perimetrul Han Tervel în iulie.",
+     src:"Știrile ProTV",c:"Operațional",sent:"negative",i:2,
+     u:"https://stirileprotv.ro/stiri/actualitate/profitul-net-al-omv-petrom-a-scazut-cu-14-in-primul-semestru-din-2026-neptun-deep-avanseaza-spre-produc-ia-din-2027.html"},
+    {t:"SNP",d:"2026-07-21",h:"Modulele pentru hidrogenul verde, livrate la Petrobrazi",
+     s:"Toate modulele proiectului de 20 MW au ajuns pe amplasament, alături de programul SAF/HVO și investițiile în regenerabile.",
+     src:"Știrile ProTV",c:"Operațional",sent:"positive",i:2,
+     u:"https://stirileprotv.ro/stiri/actualitate/profitul-net-al-omv-petrom-a-scazut-cu-14-in-primul-semestru-din-2026-neptun-deep-avanseaza-spre-produc-ia-din-2027.html"},
+    {t:"SNP",d:"2026-06-08",h:"Plata dividendului total de 0,0578 lei pe acțiune",
+     s:"Distribuirea a avut loc pe 8 iunie, către acționarii înregistrați la 15 mai. Randament net de 4,9% raportat la prețul de la finalul lui 2025.",
+     src:"Bursa.ro",c:"Dividende",sent:"positive",i:4,
+     u:"https://www.bursa.ro/omv-petrom-aloca-un-dividend-cu-randament-net-de-5-procente-49889857"},
+    {t:"SNP",d:"2026-02-04",h:"Distribuție totală de 3,6 mld. lei, peste profitul anului",
+     s:"Diferența de circa 700 mil. lei față de profitul net pe 2025 este acoperită din rezerve, sub forma dividendului special.",
+     src:"Ziarul Financiar",c:"Dividende",sent:"neutral",i:4,
+     u:"https://www.zf.ro/burse-fonduri-mutuale/premiera-la-omv-petrom-compania-propune-pentru-2026-dividende-totale-23038781"},
+
+    /* ================= SNG ================= */
+    {t:"SNG",d:"2026-08-06",h:"Contractele de foraj, vizate într-o tranzacție de 9,5 mil. euro",
+     s:"Foraj Sonde Videle vrea să cumpere activitatea de foraj a Transgex Oradea, care include contractele cu Romgaz și OMV Petrom.",
+     src:"Ziarul Financiar",c:"Tranzacții",sent:"neutral",i:2,
+     u:"https://www.zf.ro/burse-fonduri-mutuale/tranzactie-9-5-mil-euro-foraj-sonde-videle-compania-iulian-stanciu-actionar-vrea-cumpere-activitatea-foraj-transgex-oradea-46-angajati-contractele-romgaz-omv-petrom-23210997"},
+    {t:"SNG",d:"2026-08-05",h:"Scade 1,83%, la 18,28 lei, al doilea rulaj al zilei",
+     s:"Schimburi de 12,8 mil. lei într-o ședință cu deprecieri pentru majoritatea indicilor.",
+     src:"Bursa.ro",c:"Piață",sent:"negative",i:2,
+     u:"https://www.bursa.ro/bvb-deprecieri-pentru-majoritatea-indicilor-45387957"},
+    {t:"SNG",d:"2026-07-28",h:"Peste 600 mil. lei plătiți ca dividende",
+     s:"Dividendul brut de 0,1572 lei pe acțiune a fost plătit pe 28 iulie, din care circa 424 mil. lei către stat, pe participația de 70,01%.",
+     src:"Prime Transaction",c:"Dividende",sent:"neutral",i:3,
+     u:"https://www.primet.ro/informatii-piata-cotatii-bursa?simbol=sng"},
+    {t:"SNG",d:"2026-07-27",h:"Producția de energie electrică, înjumătățită",
+     s:"Generarea de electricitate, concentrată pe CTE Iernut, a scăzut la jumătate față de perioada de comparație.",
+     src:"Prime Transaction",c:"Operațional",sent:"negative",i:3,
+     u:"https://www.primet.ro/informatii-piata-cotatii-bursa?simbol=sng"},
+    {t:"SNG",d:"2026-07-22",h:"Acțiunile ating maxime istorice după știrea platformei",
+     s:"SNG a urcat cu 4,81%, la 18,30 lei, cu circa 8% în câteva ședințe. Neptun Deep contează mai mult pentru Romgaz decât pentru Petrom, pe fondul declinului producției onshore.",
+     src:"Forbes România",c:"Piață",sent:"positive",i:4,
+     u:"https://www.forbes.ro/performanta-a-actiunilor-romgaz-si-omv-petrom-dupa-asamblarea-platformei-neptun-alpha-din-cadrul-neptun-deep-reactia-pietei-vine-la-reusita-de-a-se-mentine-in-calendar-513129"},
+    {t:"SNG",d:"2026-07-21",h:"Neptun Alpha instalată, Romgaz partener în proiect",
+     s:"Platforma de producție pentru cel mai mare proiect de gaze din România este la locul ei. Primele gaze sunt țintite în 2027, la o investiție totală de până la 4 mld. euro.",
+     src:"Curs de Guvernare",c:"Operațional",sent:"positive",i:5,
+     u:"https://cursdeguvernare.ro/platforma-care-va-trata-gazele-din-neptun-deep-a-fost-instalata-in-marea-neagra-16-500-de-tone-225-de-metri-inaltime-complet-automatizata-6-din-10-sonde-sunt-finalizate-conducta-submarina-de-160.html"},
+    {t:"SNG",d:"2026-07-10",h:"Tranzacția Azomureș lasă livrarea gazelor pentru T2 2027",
+     s:"Rămân semne de întrebare privind structura tranzacției și motivul pentru care salariații Azomureș nu pot trece acum la Romgaz.",
+     src:"Profit.ro",c:"Tranzacții",sent:"neutral",i:3,
+     u:"https://www.profit.ro/insider/bursa-fonduri/romgaz-acorda-dividende-inclusiv-din-rezultatul-reportat-dar-randamentul-este-foarte-mic-22390632"},
+    {t:"SNG",d:"2026-07-06",h:"Ex-date pentru dividendul de 0,1572 lei",
+     s:"Data ex-dividend a fost 6 iulie, cu data de înregistrare 7 iulie și plata pe 28 iulie.",
+     src:"Investing.com",c:"Dividende",sent:"neutral",i:2,
+     u:"https://www.investing.com/equities/s.n.g.n-romgaz-dividends"},
+    {t:"SNG",d:"2026-03-26",h:"Rata de distribuire, redusă la 18% din profit",
+     s:"Din 3,33 mld. lei profit consolidat pe 2025 s-au repartizat doar 605,9 mil. lei, un randament net de circa 1,1%. Datoria netă a atins un vârf de circa 6,6 mld. lei.",
+     src:"Bursa.ro",c:"Dividende",sent:"negative",i:4,
+     u:"https://www.bursa.ro/romgaz-propune-dividende-de-circa-600-milioane-lei-62067858"},
+    {t:"SNG",d:"2026-02-06",h:"Pas spre preluarea activității operaționale Azomureș",
+     s:"Romgaz a avansat în procesul de preluare a operațiunilor combinatului, o mutare care i-ar schimba profilul dincolo de producția de gaze.",
+     src:"Goldring",c:"Tranzacții",sent:"neutral",i:3,
+     u:"https://www.goldring.ro/trendul-zilei/hidroelectrica-recucereste-pozitia-de-lider-la-bvb-depasind-petrom"},
+    {t:"SNG",d:"2026-01-10",h:"Cotă de piață de circa 47% pe gaze naturale",
+     s:"Producția din S1 2025 a fost de circa 2,49 mld. metri cubi, relativ stabilă an/an, cu o marjă EBITDA de circa 54,3%.",
+     src:"Rankia",c:"Analiză",sent:"neutral",i:2,
+     u:"https://rankia.ro/actiuni-romgaz-analiza-si-sugestii/"}
+  ];
+
+  var DIARY=[
+    {when:"7 aug.", iso:"2026-08-07",t:"FP",     what:"Termen scrisori de intenție pentru administratori"},
+    {when:"12 aug.",iso:"2026-08-12",t:"FP",     what:"Termen pentru ofertele detaliate"},
+    {when:"~sep.",  iso:"2026-09-01",t:"FP",     what:"AGOA cerută de Lion Capital, dividend de 0,046 lei"},
+    {when:"8 sep.", iso:"2026-09-08",t:"H2O",    what:"Ex-date, dividend special de 2,2232 lei"},
+    {when:"30 sep.",iso:"2026-09-30",t:"H2O",    what:"Plata dividendului special"},
+    {when:"toamnă", iso:"2026-10-15",t:"TLV",    what:"Posibil dividend special de 700 mil. lei"},
+    {when:"2027",   iso:"2027-01-01",t:"SNP SNG",what:"Primele gaze din Neptun Deep"}
+  ];
+
+  /* Datele scrise de flux_bvb.py au prioritate; sinteza de mai sus e doar rezerva. */
+  var GENERAT=null;
+  if(window.FLUX_DATA){
+    if(Array.isArray(window.FLUX_DATA.stiri)&&window.FLUX_DATA.stiri.length) BRIEF=window.FLUX_DATA.stiri;
+    if(Array.isArray(window.FLUX_DATA.dividende)&&window.FLUX_DATA.dividende.length) DIV=window.FLUX_DATA.dividende;
+    if(Array.isArray(window.FLUX_DATA.termene)&&window.FLUX_DATA.termene.length) DIARY=window.FLUX_DATA.termene;
+    GENERAT=window.FLUX_DATA.generat||null;
+  }
+
+  var state={items:BRIEF.slice(),ticker:"ALL",cat:"ALL",view:"stiri",shares:{}};
+  var $=function(i){return document.getElementById(i);};
+  var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
+
+  function nr(v,zec){
+    return v.toLocaleString("ro-RO",{minimumFractionDigits:zec===undefined?2:zec,
+      maximumFractionDigits:zec===undefined?2:zec});
+  }
+  function dataRo(iso){
+    if(!iso) return "—";
+    var L=["ian.","feb.","mar.","apr.","mai","iun.","iul.","aug.","sep.","oct.","nov.","dec."];
+    var p=iso.split("-");
+    return parseInt(p[2],10)+" "+L[parseInt(p[1],10)-1]+" "+p[0];
+  }
+  function ago(ds){
+    var d=new Date(ds); if(isNaN(d)) return "";
+    var z=Math.round((Date.now()-d.getTime())/864e5);
+    if(z<=0) return "azi";
+    if(z===1) return "ieri";
+    if(z<20) return z+" zile";
+    if(z<30) return z+" de zile";
+    var m=Math.round(z/30);
+    return m===1?"o lună":(m<20?m+" luni":m+" de luni");
+  }
+  function stiri(n){ return n===1?"1 știre":(n<20?n+" știri":n+" de știri"); }
+
+  /* ---------- memorie ----------
+     window.storage există doar înăuntrul unui artifact Claude. Când pagina e
+     generată de flux_bvb.py și deschisă ca fișier sau de pe un server,
+     folosim localStorage, ca numărul de acțiuni să nu se piardă. */
+  var CHEIE_MEM="flux:actiuni";
+  async function loadShares(){
+    try{
+      if(window.storage){
+        var r=await window.storage.get(CHEIE_MEM);
+        if(r&&r.value){ state.shares=JSON.parse(r.value)||{}; render(); return; }
+      }
+    }catch(e){}
+    try{
+      var v=window.localStorage&&window.localStorage.getItem(CHEIE_MEM);
+      if(v){ state.shares=JSON.parse(v)||{}; render(); }
+    }catch(e){}
+  }
+  async function saveShares(){
+    var payload=JSON.stringify(state.shares);
+    try{ if(window.storage){ await window.storage.set(CHEIE_MEM,payload); return; } }catch(e){}
+    try{ if(window.localStorage) window.localStorage.setItem(CHEIE_MEM,payload); }catch(e){}
+  }
+
+  /* ---------- știri live ----------
+     Acest mediu blochează orice cerere externă din pagină: nici API-ul, nici releele
+     RSS nu răspund. Singura cale reală către știri live e navigarea, nu fetch-ul. */
+  function openLive(){
+    var t=null;
+    TICKERS.forEach(function(x){ if(x.s===state.ticker) t=x; });
+    var q = t ? '"'+t.q+'"'
+              : '("Hidroelectrica" OR "Fondul Proprietatea" OR "Banca Transilvania" OR "OMV Petrom" OR "Romgaz")';
+    window.open(cautaTot(q,"w"),"_blank","noopener");
+  }
+
+
+  /* ---------- randare ---------- */
+  function visible(){
+    return state.items.filter(function(x){
+      if(state.ticker!=="ALL" && x.t!==state.ticker) return false;
+      if(state.cat!=="ALL" && x.c!==state.cat) return false;
+      return true;
+    }).sort(function(a,b){ return a.d<b.d?1:a.d>b.d?-1:(b.i-a.i); });
+  }
+
+  /* Cele șapte surse urmărite, plus economedia pentru guvernanța FP. */
+  var SURSE=[
+    {n:"bvb.ro",       u:"https://bvb.ro/FinancialInstruments/Markets/Shares"},
+    {n:"zf.ro",        u:"https://www.zf.ro/burse-fonduri-mutuale/"},
+    {n:"bursa.ro",     u:"https://www.bursa.ro/"},
+    {n:"profit.ro",    u:"https://www.profit.ro/"},
+    {n:"wall-street.ro",u:"https://www.wall-street.ro/"},
+    {n:"tradeville.ro",u:"https://tradeville.ro/"},
+    {n:"forbes.ro",    u:"https://www.forbes.ro/"},
+    {n:"primet.ro",    u:"https://www.primet.ro/"}
+  ];
+  var SITE_Q="(site:bvb.ro OR site:zf.ro OR site:bursa.ro OR site:profit.ro OR "+
+             "site:wall-street.ro OR site:tradeville.ro OR site:forbes.ro OR site:economedia.ro)";
+
+  function cautaTot(fraza,fereastra){
+    return "https://www.google.com/search?tbs=qdr:"+(fereastra||"m")+
+      "&q="+encodeURIComponent(fraza+" "+SITE_Q);
+  }
+  function grilaSurse(){
+    return '<div class="srcgrid">'+SURSE.map(function(s){
+      return '<a href="'+s.u+'" target="_blank" rel="noopener noreferrer">'+s.n+"</a>";
+    }).join("")+"</div>";
+  }
+
+  function renderVerify(){
+    var t=null;
+    TICKERS.forEach(function(x){ if(x.s===state.ticker) t=x; });
+
+    if(!t){
+      $("verify-label").textContent="Cele opt surse urmărite";
+      var toate='"Hidroelectrica" OR "Fondul Proprietatea" OR "Banca Transilvania" OR "OMV Petrom" OR "Romgaz"';
+      $("verify").innerHTML=
+        '<a class="searchall" href="'+esc(cautaTot("("+toate+")","w"))+'" target="_blank" rel="noopener noreferrer">'+
+          'Caută toate cinci ↗<span>Ultima săptămână, pe toate sursele</span></a>'+
+        grilaSurse();
+      return;
+    }
+
+    $("verify-label").textContent="Verifică "+t.s+" la sursă";
+    $("verify").innerHTML=
+      '<a class="searchall" href="'+esc(cautaTot('"'+t.q+'"',"m"))+'" target="_blank" rel="noopener noreferrer">'+
+        'Caută '+t.s+' ↗<span>Ultima lună, pe toate sursele</span></a>'+
+      '<a href="https://bvb.ro/FinancialInstruments/Details/FinancialInstrumentsDetails.aspx?s='+t.bvb+'" target="_blank" rel="noopener noreferrer">bvb.ro / '+t.s+'<span>Toate rapoartele curente</span></a>'+
+      '<a href="https://tradeville.ro/actiuni/'+t.tv+'/stiri" target="_blank" rel="noopener noreferrer">tradeville / '+t.s+'<span>Știri și comunicate</span></a>'+
+      '<a href="https://tradeville.ro/actiuni/'+t.tv+'/dividende" target="_blank" rel="noopener noreferrer">tradeville / dividende<span>Istoric complet</span></a>'+
+      '<a href="https://www.primet.ro/informatii-piata-cotatii-bursa?simbol='+t.pm+'" target="_blank" rel="noopener noreferrer">primet.ro / '+t.s+'<span>Comunicate, cronologic</span></a>'+
+      grilaSurse();
+  }
+
+  function renderRail(){
+    var html='<button class="tick" data-t="ALL" aria-pressed="'+(state.ticker==="ALL")+'">'+
+      '<span class="tick-top"><span class="sym">Toate cinci</span><span class="cnt">'+state.items.length+
+      '</span></span><span class="co">Întreaga listă</span></button>';
+    html+=TICKERS.map(function(t){
+      var mine=state.items.filter(function(x){return x.t===t.s;});
+      var strip="";
+      mine.slice(0,5).forEach(function(x){
+        strip+='<i class="'+(x.sent==="positive"?"pos":x.sent==="negative"?"neg":"neu")+'"></i>';
+      });
+      for(var k=mine.length;k<5;k++) strip+="<i></i>";
+      return '<button class="tick" data-t="'+t.s+'" aria-pressed="'+(state.ticker===t.s)+'">'+
+        '<span class="tick-top"><span class="sym">'+t.s+'</span><span class="cnt">'+mine.length+
+        '</span></span><span class="co">'+esc(t.name)+'</span><span class="strip">'+strip+'</span></button>';
+    }).join("");
+    $("ticks").innerHTML=html;
+
+    $("cats-block").style.display = state.view==="div" ? "none" : "";
+    var present={}; state.items.forEach(function(x){present[x.c]=1;});
+    var chips=['<button class="chip" data-cat="ALL" aria-pressed="'+(state.cat==="ALL")+'">Toate</button>'];
+    CATS.forEach(function(c){
+      if(present[c]) chips.push('<button class="chip" data-cat="'+c+'" aria-pressed="'+(state.cat===c)+'">'+c+"</button>");
+    });
+    $("cats").innerHTML=chips.join("");
+
+    renderVerify();
+    var today=new Date().toISOString().slice(0,10);
+    $("diary").innerHTML=DIARY.map(function(e){
+      return '<li class="'+(e.iso<today?"past":"")+'"><span class="d-when">'+esc(e.when)+"</span>"+
+        '<span class="d-what"><b>'+esc(e.t)+"</b> "+esc(e.what)+"</span></li>";
+    }).join("");
+  }
+
+  function renderBanner(){
+    var b=$("banner");
+    if(state.view==="div"){
+      b.innerHTML='<div class="banner"><b>Toate distribuțiile din 2026 pentru cele cinci dețineri.</b> '+
+        'Scrie numărul de acțiuni la fiecare simbol și îți calculez sumele brute și nete, cu impozitul de 16% '+
+        'reținut la sursă. Numerele rămân salvate local, la tine.</div>';
+      return;
+    }
+    if(GENERAT){
+      b.innerHTML='<div class="banner ok"><b>Pagină generată de flux_bvb.py.</b> '+
+        'Se reîmprospătează la fiecare rulare a scriptului, așa că de fiecare dată când o deschizi '+
+        'vezi ce era proaspăt la ultima verificare. <b>Știri live</b> deschide căutarea pe toate sursele.</div>';
+    } else {
+      b.innerHTML='<div class="banner warn"><b>Versiune provizorie, statică.</b> '+
+        'Sinteză documentată pe 6 august 2026, publicată manual cât timp rularea automată '+
+        'este indisponibilă. Nu se actualizează singură. <b>Știri live</b> deschide '+
+        'căutarea pe toate sursele, mereu la zi.</div>';
+    }
+  }
+
+  function storyHTML(x){
+    var cls=x.sent==="positive"?"pos":x.sent==="negative"?"neg":"";
+    var meter=""; for(var i=1;i<=5;i++) meter+='<i class="'+(i<=x.i?"on":"")+'"></i>';
+    var title=x.u?'<a href="'+esc(x.u)+'" target="_blank" rel="noopener noreferrer">'+esc(x.h)+"</a>":esc(x.h);
+    return '<article class="story '+cls+'"><div class="gutter"><span class="g-sym">'+x.t+"</span>"+
+      '<span class="g-ago">'+esc(ago(x.d))+"</span></div><div>"+
+      '<h2 class="headline">'+title+"</h2>"+
+      (x.s?'<p class="summary">'+esc(x.s)+"</p>":"")+
+      '<div class="meta">'+
+        '<span class="meter" title="Impact estimat '+x.i+' din 5">'+meter+"</span>"+
+        '<span class="cat">'+esc(x.c)+"</span>"+
+        '<span class="src">'+esc(x.src)+" · "+esc(x.d)+"</span>"+
+        (x.u?'<a class="open" href="'+esc(x.u)+'" target="_blank" rel="noopener noreferrer">Deschide ↗</a>':"")+
+      "</div></div></article>";
+  }
+
+  var STARI={platit:"Plătit",urmeaza:"Urmează",propus:"Propus",respins:"Respins"};
+
+  function renderDiv(){
+    var today=new Date().toISOString().slice(0,10);
+    var lista=DIV.filter(function(d){ return state.ticker==="ALL"||d.t===state.ticker; });
+    var deIncasat=0, incasat=0;
+
+    DIV.forEach(function(d){
+      var n=state.shares[d.t]||0;
+      if(!n||!d.brut) return;
+      var net=d.brut*n*(1-TAX);
+      if(d.stare==="urmeaza") deIncasat+=net;
+      else if(d.stare==="platit") incasat+=net;
+    });
+
+    var html='<div class="div-top"><div>'+
+      '<p class="lbl">De încasat de acum înainte, net</p>'+
+      '<div class="div-big">'+(deIncasat?nr(deIncasat):"—")+'<small>lei</small></div></div>'+
+      '<div class="div-hint">'+
+      (incasat?"Deja încasat în 2026: <b style=\"color:var(--text)\">"+nr(incasat)+" lei</b> net. ":"")+
+      'Singura plată în bani rămasă din ce e aprobat este dividendul special Hidroelectrica, pe 30 septembrie. '+
+      'Restul depinde de două adunări care nu au fost încă ținute.</div></div>';
+
+    TICKERS.forEach(function(t){
+      var rows=lista.filter(function(d){ return d.t===t.s; });
+      if(!rows.length) return;
+      var n=state.shares[t.s]||"";
+      html+='<div class="divblock"><div class="divhead"><div class="who">'+
+        '<span class="s">'+t.s+'</span><span class="n">'+esc(t.name)+'</span></div>'+
+        '<div class="shares"><label for="sh-'+t.s+'">Acțiuni deținute</label>'+
+        '<input id="sh-'+t.s+'" data-sh="'+t.s+'" type="number" min="0" step="1" '+
+        'inputmode="numeric" placeholder="0" value="'+esc(n)+'"></div></div>';
+
+      rows.forEach(function(d){
+        var sh=state.shares[t.s]||0;
+        var brutTot=d.brut*sh, netTot=brutTot*(1-TAX);
+        html+='<div class="drow">'+
+          '<div class="dname">'+esc(d.nume)+
+            '<span class="dstate '+d.stare+'">'+STARI[d.stare]+'</span>'+
+            '<em>Total distribuit: '+esc(d.total)+'</em></div>'+
+          '<div class="dval">'+(d.brut?'<b>'+nr(d.brut,d.brut<1?6:6)+'</b> lei brut/acț.':'<span style="color:var(--dim)">—</span>')+'</div>'+
+          '<div class="ddate"><span>Ex-date</span>'+dataRo(d.ex)+'</div>'+
+          '<div class="dyou">'+
+            (d.brut&&sh?'<b>'+nr(netTot)+' lei</b><span>net · brut '+nr(brutTot)+'</span>':
+              '<span style="color:var(--dim)">Plata: '+dataRo(d.plata)+'</span>')+
+          '</div>'+
+          '<div class="dnote">'+esc(d.nota)+
+            (d.brut&&sh?' <b style="color:var(--text)">Plata: '+dataRo(d.plata)+'.</b>':'')+
+            ' <a href="'+esc(d.u)+'" target="_blank" rel="noopener noreferrer">Sursa ↗</a></div>'+
+        '</div>';
+      });
+      html+='</div>';
+    });
+    return html;
+  }
+
+  function render(){
+    renderRail(); renderBanner();
+    document.querySelectorAll("#flux .view-btn").forEach(function(b){
+      b.setAttribute("aria-pressed",String(b.dataset.view===state.view));
+    });
+
+    if(state.view==="div"){
+      $("count").textContent="2026 · impozit 16%"+(state.ticker==="ALL"?"":" · "+state.ticker);
+      $("feed").innerHTML=renderDiv();
+      return;
+    }
+    var rows=visible();
+    $("count").textContent=stiri(rows.length)+
+      (state.ticker==="ALL"?"":" · "+state.ticker)+(state.cat==="ALL"?"":" · "+state.cat);
+    $("feed").innerHTML=rows.length?rows.map(storyHTML).join(""):
+      '<div class="empty"><h3>Nicio știre pentru acest filtru</h3>'+
+      "<p>Renunță la filtrul de subiect sau alege altă deținere.</p></div>";
+  }
+
+  var CERERE="Actualizează-mi sinteza BVB și fii exhaustiv. Pentru fiecare dintre Hidroelectrica (H2O), "+
+    "Fondul Proprietatea (FP), Banca Transilvania (TLV), OMV Petrom (SNP) și Romgaz (SNG), caută separat "+
+    "toate știrile din ultimele 7 zile: rapoarte curente BVB, rezultate, dividende, AGA, reglementare, "+
+    "tranzacții, rating-uri, analize, ședințe de bursă. Caută obligatoriu pe bvb.ro, zf.ro, bursa.ro, "+
+    "profit.ro, wall-street.ro, tradeville.ro, forbes.ro și primet.ro, inclusiv pe paginile de emitent "+
+    "ale fiecărui simbol de pe bvb.ro, tradeville.ro și primet.ro. Confirmă și dacă s-a "+
+    "schimbat ceva la calendarul de dividende. Dă-mi pentru fiecare știre titlul, un rezumat de o frază, "+
+    "sursa, data și linkul, cele mai noi întâi.";
+
+  var root=document.getElementById("flux");
+  root.addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    if(b.dataset.view){ state.view=b.dataset.view; render(); }
+    else if(b.dataset.t){ state.ticker=b.dataset.t; render(); }
+    else if(b.dataset.cat){ state.cat=b.dataset.cat; render(); }
+  });
+  root.addEventListener("input",function(e){
+    var i=e.target;
+    if(!i.dataset||!i.dataset.sh) return;
+    var v=parseInt(i.value,10);
+    state.shares[i.dataset.sh]=(isNaN(v)||v<0)?0:v;
+    var pos=i.selectionStart;
+    render();
+    var again=$("sh-"+i.dataset.sh);
+    if(again){ again.focus(); try{ again.setSelectionRange(pos,pos); }catch(err){} }
+    saveShares();
+  });
+  $("live").addEventListener("click",openLive);
+  $("copy").addEventListener("click",function(){
+    var btn=$("copy");
+    function done(ok){
+      btn.textContent=ok?"Copiat":"Copiază manual";
+      setTimeout(function(){ btn.textContent="Copiază cererea"; },2200);
+    }
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(CERERE).then(function(){done(true);},function(){done(false);});
+    } else { done(false); }
+  });
+
+  if(GENERAT){
+    var g=new Date(GENERAT);
+    if(!isNaN(g)){
+      $("stamp").innerHTML="Actualizat <b>"+
+        g.toLocaleString("ro-RO",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})+"</b>";
+    }
+  }
+  render();
+  loadShares();
+})();
+</script>
