@@ -20,6 +20,8 @@ Fără dependențe externe: doar biblioteca standard Python 3.9+.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures as cf
+import gzip
 import hashlib
 import html as htmlmod
 import json
@@ -33,6 +35,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import webbrowser
+import zlib
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from email.utils import parsedate_to_datetime
@@ -49,7 +52,8 @@ STATE_PATH = HERE / "state.json"
 TEMPLATE_PATH = HERE / "flux_template.html"
 OUTPUT_PATH = HERE / "flux.html"
 
-UA = "Mozilla/5.0 (compatible; FluxBVB/1.0; monitor personal de știri)"
+UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36")
 TIMEOUT = 25
 
 TICKERS = [
@@ -132,14 +136,40 @@ def log(msg: str, quiet: bool = False) -> None:
         print(f"[{datetime.now():%H:%M:%S}] {msg}", flush=True)
 
 
-def http_get(url: str, timeout: int = TIMEOUT) -> bytes:
+def http_get(url: str, timeout: int = TIMEOUT, incercari: int = 2) -> bytes:
+    """Reincearca o data la esecuri trecatoare; 403/404 nu se reincearca,
+    fiindca a doua oara raspunsul ar fi identic."""
+    ultima: Exception = RuntimeError("nedefinit")
+    for i in range(incercari):
+        if i:
+            time.sleep(1.5 * i)
+        try:
+            return _http_get_odata(url, timeout)
+        except urllib.error.HTTPError as e:
+            if e.code in (403, 404, 410):
+                raise
+            ultima = e
+        except Exception as e:
+            ultima = e
+    raise ultima
+
+
+def _http_get_odata(url: str, timeout: int = TIMEOUT) -> bytes:
     req = urllib.request.Request(url, headers={
         "User-Agent": UA,
-        "Accept": "application/rss+xml, application/xml, text/xml, text/html;q=0.9",
+        "Accept": "application/rss+xml, application/xml, text/xml, */*;q=0.8",
         "Accept-Language": "ro-RO,ro;q=0.9,en;q=0.8",
+        "Accept-Encoding": "gzip, deflate",
+        "Connection": "close",
     })
     with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read()
+        date = r.read()
+        codare = (r.headers.get("Content-Encoding") or "").lower()
+    if "gzip" in codare:
+        date = gzip.decompress(date)
+    elif "deflate" in codare:
+        date = zlib.decompress(date, -zlib.MAX_WBITS)
+    return date
 
 
 def curata(text: str) -> str:
@@ -257,9 +287,9 @@ def google_news(interogare: str) -> list[dict]:
 
 
 def rapoarte_bvb(simbol: str) -> list[dict]:
-    """Rapoartele curente de pe pagina emitentului. Best effort: dacă BVB
-    își schimbă structura paginii, funcția returnează listă goală în loc
-    să oprească rularea."""
+    """Rapoartele curente de pe pagina emitentului. Best effort: daca BVB isi
+    schimba structura paginii, functia returneaza lista goala in loc sa
+    opreasca rularea."""
     url = ("https://bvb.ro/FinancialInstruments/Details/"
            f"FinancialInstrumentsDetails.aspx?s={simbol}")
     try:
@@ -267,11 +297,14 @@ def rapoarte_bvb(simbol: str) -> list[dict]:
     except Exception:
         return []
 
+    azi = datetime.now(timezone.utc).date().isoformat()
     iesire: list[dict] = []
-    # Titlurile rapoartelor apar ca linkuri către /FinancialInstruments/SelectedData/NewsItem/...
     tipar = re.compile(
         r'href="(?P<href>[^"]*NewsItem[^"]*)"[^>]*>(?P<titlu>[^<]{10,300})</a>',
         re.I)
+    # dd/mm/yyyy sau dd.mm.yyyy, asa cum apare BVB langa fiecare raport
+    tipar_data = re.compile(r"(\d{1,2})[./](\d{1,2})[./](20\d{2})")
+
     for m in tipar.finditer(pagina):
         titlu = curata(m.group("titlu"))
         if not titlu:
@@ -279,11 +312,22 @@ def rapoarte_bvb(simbol: str) -> list[dict]:
         href = htmlmod.unescape(m.group("href"))
         if href.startswith("/"):
             href = "https://bvb.ro" + href
+
+        # Data reala se afla, de regula, chiar inaintea linkului. Fara asta,
+        # un raport din martie ar aparea ca stire de azi si ar strica ordinea.
+        context = pagina[max(0, m.start() - 320):m.start()]
+        potriviri = tipar_data.findall(context)
+        if potriviri:
+            zi, luna, an = potriviri[-1]
+            data = f"{an}-{int(luna):02d}-{int(zi):02d}"
+        else:
+            data = azi
+
         iesire.append({
             "titlu": titlu,
             "link": href,
             "rezumat": "",
-            "data": datetime.now(timezone.utc).date().isoformat(),
+            "data": data,
             "sursa": "Raport BVB",
         })
         if len(iesire) >= 30:
@@ -300,67 +344,77 @@ def potrivit(item: dict, tk: dict) -> bool:
     return bool(re.search(rf"\b{tk['s'].lower()}\b", text))
 
 
-def aduna(quiet: bool = False) -> tuple[list[dict], list[str]]:
-    """Returnează (știri, jurnal_diagnostic)."""
+def aduna(zile_max: int = 90) -> tuple[list[dict], list[str]]:
+    """Returneaza (stiri, jurnal_diagnostic). Sursele se citesc in paralel:
+    secvential se pierdeau peste 20 de secunde doar in pauze."""
     jurnal: list[str] = []
-    brute: list[tuple[str, dict]] = []   # (ticker, item)
+    brute: list[tuple[str, dict]] = []
+    limita = (datetime.now(timezone.utc) - timedelta(days=zile_max)).date().isoformat()
 
-    for tk in TICKERS:
+    def ia_google(tk: dict):
         try:
-            gasite = google_news(tk["cauta"])
-            jurnal.append(f"OK   Google News · {tk['s']} · {len(gasite)} titluri")
-            brute += [(tk["s"], it) for it in gasite]
+            g = google_news(tk["cauta"])
+            return f"OK   Google News · {tk['s']} · {len(g)} titluri", [(tk["s"], x) for x in g]
         except Exception as e:
-            jurnal.append(f"EROARE Google News · {tk['s']} · {e}")
-        time.sleep(1.0)  # politicos față de server
+            cod = getattr(e, "code", "")
+            return f"EROARE Google News · {tk['s']} · {type(e).__name__}{f' {cod}' if cod else ''}", []
 
+    def ia_bvb(tk: dict):
         try:
-            rap = rapoarte_bvb(tk["s"])
-            if rap:
-                jurnal.append(f"OK   bvb.ro · {tk['s']} · {len(rap)} rapoarte")
-            else:
-                jurnal.append(f"GOL  bvb.ro · {tk['s']} · nimic extras (pagina s-a schimbat?)")
-            brute += [(tk["s"], it) for it in rap]
+            r = rapoarte_bvb(tk["s"])
+            et = "OK  " if r else "GOL "
+            return f"{et} bvb.ro · {tk['s']} · {len(r)} rapoarte", [(tk["s"], x) for x in r]
         except Exception as e:
-            jurnal.append(f"EROARE bvb.ro · {tk['s']} · {e}")
-        time.sleep(1.0)
+            return f"EROARE bvb.ro · {tk['s']} · {type(e).__name__}", []
 
-    for nume, url in FEEDURI_GENERALE:
+    def ia_feed(nume: str, url: str):
         try:
             gasite = parseaza_rss(http_get(url), nume)
-            atins = 0
-            for it in gasite:
-                for tk in TICKERS:
-                    if potrivit(it, tk):
-                        brute.append((tk["s"], it))
-                        atins += 1
-                        break
-            jurnal.append(f"OK   {nume} · {len(gasite)} titluri, {atins} relevante")
         except Exception as e:
-            jurnal.append(f"EROARE {nume} · {type(e).__name__}")
-        time.sleep(0.6)
+            cod = getattr(e, "code", "")
+            return (f"EROARE {nume} · {type(e).__name__}"
+                    + (f" {cod}" if cod else "") + f" · {url}"), []
+        rez = []
+        for it in gasite:
+            # Un articol poate viza mai multe companii deodata (de exemplu
+            # Neptun Deep = Petrom + Romgaz). Il atribuim fiecareia.
+            for tk in TICKERS:
+                if potrivit(it, tk):
+                    rez.append((tk["s"], it))
+        et = "OK  " if gasite else "GOL "
+        return f"{et} {nume} · {len(gasite)} titluri, {len(rez)} relevante", rez
 
-    # dedupe + normalizare în formatul folosit de pagină
+    sarcini = []
+    with cf.ThreadPoolExecutor(max_workers=6) as pool:
+        for tk in TICKERS:
+            sarcini.append(pool.submit(ia_google, tk))
+            sarcini.append(pool.submit(ia_bvb, tk))
+        for nume, url in FEEDURI_GENERALE:
+            sarcini.append(pool.submit(ia_feed, nume, url))
+        for f in sarcini:
+            linie, elemente = f.result()
+            jurnal.append(linie)
+            brute += elemente
+
     vazute: set[str] = set()
     stiri: list[dict] = []
+    prea_vechi = 0
     for ticker, it in brute:
+        if it["data"] < limita:
+            prea_vechi += 1
+            continue
         k = cheie(ticker, it["titlu"])
         if k in vazute:
             continue
         vazute.add(k)
         categorie, sentiment, impact = clasifica(it["titlu"], it["rezumat"])
         stiri.append({
-            "id": k,
-            "t": ticker,
-            "d": it["data"],
-            "h": it["titlu"],
-            "s": it["rezumat"][:240],
-            "src": it["sursa"],
-            "c": categorie,
-            "sent": sentiment,
-            "i": impact,
-            "u": it["link"],
+            "id": k, "t": ticker, "d": it["data"], "h": it["titlu"],
+            "s": it["rezumat"][:240], "src": it["sursa"], "c": categorie,
+            "sent": sentiment, "i": impact, "u": it["link"],
         })
+    if prea_vechi:
+        jurnal.append(f"     {prea_vechi} articole ignorate, mai vechi de {zile_max} zile")
 
     stiri.sort(key=lambda x: (x["d"], x["i"]), reverse=True)
     return stiri, jurnal
@@ -550,7 +604,7 @@ def main() -> int:
     ap.add_argument("--quiet", action="store_true", help="fără mesaje în consolă")
     ap.add_argument("--reset", action="store_true", help="uită tot istoricul de deduplicare")
     ap.add_argument("--out", metavar="CALE", default=None,
-                    help="unde se scrie pagina (implicit flux.html; pentru Pages: public/index.html)")
+                    help="unde se scrie pagina (implicit flux.html; pentru GitHub Pages: index.html)")
     args = ap.parse_args()
 
     cfg = incarca_config()
@@ -560,15 +614,18 @@ def main() -> int:
         log("Stare ștearsă.", args.quiet)
 
     log("Citesc sursele…", args.quiet)
-    stiri, jurnal = aduna(args.quiet)
+    stiri, jurnal = aduna(int(cfg.get("zile_max", 90)))
 
     if args.test:
         print("\n--- diagnostic surse ---")
         for linie in jurnal:
             print(" ", linie)
-        print(f"\n  total știri unice: {len(stiri)}")
+        print(f"\n  total stiri unice: {len(stiri)}")
+        if stiri:
+            print(f"  cea mai recenta: {stiri[0]['d']}")
         for tk in TICKERS:
-            print(f"    {tk['s']}: {sum(1 for x in stiri if x['t'] == tk['s'])}")
+            ale = [x for x in stiri if x["t"] == tk["s"]]
+            print(f"    {tk['s']}: {len(ale)}" + (f" (cea mai noua {ale[0]['d']})" if ale else ""))
         return 0
 
     print("--- surse ---", flush=True)
@@ -607,7 +664,6 @@ def main() -> int:
             trimite_telegram(cfg, text_telegram(noi, url_pub), args.quiet)
             subiect = (f"Flux BVB · {len(noi)} știri noi · "
                        + ", ".join(sorted({x['t'] for x in noi})))
-            url_pub = cfg.get("url_public") or os.getenv("FLUX_URL_PUBLIC", "")
             trimite_email(cfg, subiect, html_email(noi, cale, url_pub), args.quiet)
     elif not noi:
         log("Nimic nou de la ultima verificare.", args.quiet)
