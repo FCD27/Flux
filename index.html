@@ -266,7 +266,7 @@
   </footer>
 </div>
 
-<script id="flux-data">window.FLUX_DATA=null;/*__FLUX_DATA__*/</script>
+<script id="flux-data">window.FLUX_DATA={"generat": "2026-08-07T10:45:42.142048+00:00", "stiri": []};</script>
 <script>
 (function(){
   var TAX=0.16;
@@ -792,10 +792,8 @@
         'Se reîmprospătează la fiecare rulare a scriptului, așa că de fiecare dată când o deschizi '+
         'vezi ce era proaspăt la ultima verificare. <b>Știri live</b> deschide căutarea pe toate sursele.</div>';
     } else {
-      b.innerHTML='<div class="banner warn"><b>Versiune provizorie, statică.</b> '+
-        'Sinteză documentată pe 6 august 2026, publicată manual cât timp rularea automată '+
-        'este indisponibilă. Nu se actualizează singură. <b>Știri live</b> deschide '+
-        'căutarea pe toate sursele, mereu la zi.</div>';
+      b.innerHTML='<div class="banner warn"><b>Nu s-au injectat date &mdash; vezi sinteza de rezervă.</b> '+
+        'Rulează <code>python3 flux_bvb.py</code> ca să regenerezi pagina cu știrile la zi.</div>';
     }
   }
 
