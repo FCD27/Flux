@@ -63,14 +63,29 @@ TICKERS = [
 # RSS-uri de publicații. Scriptul le încearcă pe toate și le ignoră tăcut pe
 # cele care nu răspund — adaugă sau șterge liber.
 FEEDURI_GENERALE = [
-    ("Ziarul Financiar", "https://www.zf.ro/rss"),
-    ("Ziarul Financiar — burse", "https://www.zf.ro/rss/burse-fonduri-mutuale"),
-    ("Bursa.ro", "https://www.bursa.ro/rss"),
-    ("Profit.ro", "https://www.profit.ro/rss"),
-    ("Wall-Street.ro", "https://www.wall-street.ro/rss"),
+    # Ziarul Financiar - tiparul real e /rss/<sectiune>, confirmat in cataloage publice
+    ("Ziarul Financiar", "https://www.zf.ro/rss.xml"),
+    ("ZF Burse", "https://www.zf.ro/rss/burse-fonduri-mutuale"),
+    ("ZF Banci", "https://www.zf.ro/rss/banci-si-asigurari"),
+    ("ZF Energie", "https://www.zf.ro/rss/companii/energie"),
+    ("ZF Piata energiei", "https://www.zf.ro/rss/piata-energiei"),
+    ("ZF 24", "https://www.zf.ro/rss/zf-24"),
+    # Ziare.com - sectiuni numerice
+    ("Ziare.com business", "https://www.ziare.com/rss/business.xml"),
+    ("Ziare.com companii", "https://www.ziare.com/rss/47.xml"),
+    ("Ziare.com investitii", "https://www.ziare.com/rss/48.xml"),
+    # Restul presei economice
+    ("HotNews economie", "https://www.hotnews.ro/rss/economie"),
+    ("Mediafax economic", "https://www.mediafax.ro/economic.xml"),
+    ("Stirile ProTV economie", "https://rss.stirileprotv.ro/stiri/economie/"),
+    ("Capital", "https://www.capital.ro/usr/rss/index20.xml"),
+    # Fluxuri WordPress (tiparul /feed)
     ("Economedia", "https://economedia.ro/feed"),
     ("Curs de Guvernare", "https://cursdeguvernare.ro/feed"),
     ("Financial Intelligence", "https://financialintelligence.ro/feed"),
+    ("Profit.ro", "https://www.profit.ro/feed"),
+    ("Bursa.ro", "https://www.bursa.ro/feed"),
+    ("Wall-Street.ro", "https://www.wall-street.ro/feed"),
 ]
 
 CATEGORII = [
@@ -271,7 +286,7 @@ def rapoarte_bvb(simbol: str) -> list[dict]:
             "data": datetime.now(timezone.utc).date().isoformat(),
             "sursa": "Raport BVB",
         })
-        if len(iesire) >= 15:
+        if len(iesire) >= 30:
             break
     return iesire
 
@@ -376,7 +391,7 @@ def scrie_pagina(stiri: list[dict], cfg: dict, iesire: Path | None = None) -> Pa
         raise SystemExit(f"Lipsește șablonul: {TEMPLATE_PATH}")
     sablon = TEMPLATE_PATH.read_text(encoding="utf-8")
 
-    pastreaza = int(cfg.get("stiri_in_pagina", 120))
+    pastreaza = int(cfg.get("stiri_in_pagina", 250))
     date = {
         "generat": datetime.now(timezone.utc).isoformat(),
         "stiri": stiri[:pastreaza],
@@ -556,9 +571,9 @@ def main() -> int:
             print(f"    {tk['s']}: {sum(1 for x in stiri if x['t'] == tk['s'])}")
         return 0
 
+    print("--- surse ---", flush=True)
     for linie in jurnal:
-        if not linie.startswith("OK"):
-            log(linie, args.quiet)
+        print("  " + linie, flush=True)
 
     stare = incarca_stare()
     acum = datetime.now(timezone.utc).isoformat()
@@ -568,6 +583,18 @@ def main() -> int:
     for x in stiri:
         stare["vazute"].setdefault(x["id"], acum)
     salveaza_stare(stare)
+
+    if stiri:
+        proaspete = sum(1 for x in stiri
+                        if x["d"] >= (datetime.now(timezone.utc) - timedelta(days=1)).date().isoformat())
+        print(f"--- {len(stiri)} stiri unice | cea mai recenta: {stiri[0]['d']} | "
+              f"din ultimele 24h: {proaspete}", flush=True)
+        for tk in TICKERS:
+            ale = [x for x in stiri if x["t"] == tk["s"]]
+            print(f"      {tk['s']}: {len(ale)}" + (f" (cea mai noua {ale[0]['d']})" if ale else ""),
+                  flush=True)
+    else:
+        print("--- ATENTIE: zero stiri. Toate sursele au esuat.", flush=True)
 
     cale = scrie_pagina(stiri, cfg, Path(args.out) if args.out else None)
     log(f"Pagină scrisă: {cale}  ({len(stiri)} știri, {len(noi)} noi)", args.quiet)
