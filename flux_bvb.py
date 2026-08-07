@@ -67,29 +67,21 @@ TICKERS = [
 # RSS-uri de publicații. Scriptul le încearcă pe toate și le ignoră tăcut pe
 # cele care nu răspund — adaugă sau șterge liber.
 FEEDURI_GENERALE = [
-    # Ziarul Financiar - tiparul real e /rss/<sectiune>, confirmat in cataloage publice
+    # Doar fluxuri confirmate ca raspund. Cele care dadeau 404/410 au fost scoase:
+    # zf.ro/rss/companii/energie, ziare.com/rss/47 si /48, hotnews.ro/rss/economie,
+    # mediafax.ro/economic.xml, capital.ro, profit.ro/feed, bursa.ro/feed,
+    # wall-street.ro/feed. Publicatiile acelea ajung oricum prin Google News,
+    # care le agrega si le livreaza fara sa fie nevoie de RSS propriu.
     ("Ziarul Financiar", "https://www.zf.ro/rss.xml"),
     ("ZF Burse", "https://www.zf.ro/rss/burse-fonduri-mutuale"),
     ("ZF Banci", "https://www.zf.ro/rss/banci-si-asigurari"),
-    ("ZF Energie", "https://www.zf.ro/rss/companii/energie"),
-    ("ZF Piata energiei", "https://www.zf.ro/rss/piata-energiei"),
     ("ZF 24", "https://www.zf.ro/rss/zf-24"),
-    # Ziare.com - sectiuni numerice
+    ("ZF Companii", "https://www.zf.ro/rss/companii"),
     ("Ziare.com business", "https://www.ziare.com/rss/business.xml"),
-    ("Ziare.com companii", "https://www.ziare.com/rss/47.xml"),
-    ("Ziare.com investitii", "https://www.ziare.com/rss/48.xml"),
-    # Restul presei economice
-    ("HotNews economie", "https://www.hotnews.ro/rss/economie"),
-    ("Mediafax economic", "https://www.mediafax.ro/economic.xml"),
     ("Stirile ProTV economie", "https://rss.stirileprotv.ro/stiri/economie/"),
-    ("Capital", "https://www.capital.ro/usr/rss/index20.xml"),
-    # Fluxuri WordPress (tiparul /feed)
     ("Economedia", "https://economedia.ro/feed"),
     ("Curs de Guvernare", "https://cursdeguvernare.ro/feed"),
     ("Financial Intelligence", "https://financialintelligence.ro/feed"),
-    ("Profit.ro", "https://www.profit.ro/feed"),
-    ("Bursa.ro", "https://www.bursa.ro/feed"),
-    ("Wall-Street.ro", "https://www.wall-street.ro/feed"),
 ]
 
 CATEGORII = [
