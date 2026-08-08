@@ -31,6 +31,10 @@
 #flux .masthead-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 #flux .stamp{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em}
 #flux .stamp b{color:var(--text);font-weight:500}
+#flux .stamp.vechi{color:var(--amber)}
+#flux .stamp.vechi b{color:var(--amber)}
+#flux .stamp .rel{color:var(--dim)}
+#flux .stamp.vechi .rel{color:var(--amber)}
 
 #flux button{font-family:var(--mono);cursor:pointer;border-radius:4px}
 @media (prefers-reduced-motion:no-preference){#flux button{transition:background .12s,border-color .12s,color .12s}}
@@ -60,11 +64,6 @@
 #flux .cnt{font-family:var(--mono);font-size:11px;color:var(--muted)}
 #flux .co{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
   color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#flux .strip{display:flex;gap:2px;margin-top:7px;height:3px}
-#flux .strip i{flex:1;background:var(--rule);border-radius:1px}
-#flux .strip i.pos{background:var(--up)}
-#flux .strip i.neg{background:var(--down)}
-#flux .strip i.neu{background:var(--flat);opacity:.55}
 
 #flux .chips{display:flex;flex-wrap:wrap;gap:5px}
 #flux .chip{background:transparent;border:1px solid var(--rule);color:var(--muted);
@@ -214,7 +213,7 @@
   <header class="masthead">
     <div class="brand">
       <h1 class="wordmark">Flux<em>.</em></h1>
-      <span class="eyebrow">Bursa de Valori București &middot; cinci dețineri</span>
+      <span class="eyebrow">Bursa de Valori București &middot; cinci companii</span>
     </div>
     <div class="masthead-right">
       <span class="stamp" id="stamp">Situație la <b>6 aug. 2026</b></span>
@@ -225,7 +224,7 @@
 
   <div class="stage">
     <aside class="rail">
-      <p class="rail-label">Dețineri</p>
+      <p class="rail-label">Companii</p>
       <div class="ticks" id="ticks"></div>
 
       <div class="rail-block" id="cats-block">
@@ -748,18 +747,13 @@
 
   function renderRail(){
     var html='<button class="tick" data-t="ALL" aria-pressed="'+(state.ticker==="ALL")+'">'+
-      '<span class="tick-top"><span class="sym">Toate cinci</span><span class="cnt">'+state.items.length+
-      '</span></span><span class="co">Întreaga listă</span></button>';
+      '<span class="tick-top"><span class="sym">Toate</span><span class="cnt">'+state.items.length+
+      '</span></span></button>';
     html+=TICKERS.map(function(t){
       var mine=state.items.filter(function(x){return x.t===t.s;});
-      var strip="";
-      mine.slice(0,5).forEach(function(x){
-        strip+='<i class="'+(x.sent==="positive"?"pos":x.sent==="negative"?"neg":"neu")+'"></i>';
-      });
-      for(var k=mine.length;k<5;k++) strip+="<i></i>";
       return '<button class="tick" data-t="'+t.s+'" aria-pressed="'+(state.ticker===t.s)+'">'+
         '<span class="tick-top"><span class="sym">'+t.s+'</span><span class="cnt">'+mine.length+
-        '</span></span><span class="co">'+esc(t.name)+'</span><span class="strip">'+strip+'</span></button>';
+        '</span></span><span class="co">'+esc(t.name)+'</span></button>';
     }).join("");
     $("ticks").innerHTML=html;
 
@@ -782,7 +776,7 @@
   function renderBanner(){
     var b=$("banner");
     if(state.view==="div"){
-      b.innerHTML='<div class="banner"><b>Toate distribuțiile din 2026 pentru cele cinci dețineri.</b> '+
+      b.innerHTML='<div class="banner"><b>Toate distribuțiile din 2026 pentru cele cinci companii.</b> '+
         'Scrie numărul de acțiuni la fiecare simbol și îți calculez sumele brute și nete, cu impozitul de 16% '+
         'reținut la sursă. Numerele rămân salvate local, la tine.</div>';
       return;
@@ -927,14 +921,32 @@
     } else { done(false); }
   });
 
-  if(GENERAT){
+  /* Marcajul de timp e singurul semn ca sistemul mai respira. Il aratam
+     explicit, cu vechime relativa, si il colorăm cand trece de 3 ore —
+     scriptul ruleaza din ora in ora, deci atat inseamna ca ceva s-a oprit. */
+  function randeazaStamp(){
+    var el=$("stamp");
+    if(!GENERAT){ return; }
     var g=new Date(GENERAT);
-    if(!isNaN(g)){
-      $("stamp").innerHTML="Actualizat <b>"+
-        g.toLocaleString("ro-RO",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})+"</b>";
-    }
+    if(isNaN(g)){ return; }
+    var min=Math.floor((Date.now()-g.getTime())/60000);
+    var rel = min<1 ? "chiar acum"
+            : min<60 ? "acum "+min+" min"
+            : min<120 ? "acum o oră"
+            : min<1440 ? "acum "+Math.floor(min/60)+" ore"
+            : "acum "+Math.floor(min/1440)+(Math.floor(min/1440)===1?" zi":" zile");
+    el.className = "stamp" + (min>180 ? " vechi" : "");
+    el.innerHTML = "Ultima verificare <b>" +
+      g.toLocaleString("ro-RO",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) +
+      "</b> <span class=\"rel\">· " + rel + "</span>";
+    el.title = min>180
+      ? "Scriptul ar trebui sa ruleze din ora in ora. Verifica tab-ul Actions din GitHub."
+      : "Ora ultimei cautari pe surse, in ora ta locala.";
   }
+
   render();
+  randeazaStamp();
+  setInterval(randeazaStamp, 60000);
   loadShares();
 })();
 </script>
