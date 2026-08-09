@@ -2,18 +2,23 @@ name: Flux BVB
 
 on:
   schedule:
-    # Orele sunt UTC. Vara Romania e UTC+3, iarna UTC+2.
-    # Adica la fiecare 30 de minute, aproximativ 07:00-19:00 ora Romaniei, luni-vineri.
-    - cron: "*/30 4-16 * * 1-5"
-  workflow_dispatch:        # buton de rulare manuala, in tab-ul Actions
+    - cron: "0 * * * *"     # din ora in ora, non-stop
+  workflow_dispatch:        # buton de rulare manuala
+  push:
+    branches: [main]
+    paths:
+      - "flux_bvb.py"
+      - "flux_template.html"
+      - ".github/workflows/flux.yml"
 
-# O singura rulare odata: doua simultane s-ar calca pe state.json
 concurrency:
   group: flux-bvb
   cancel-in-progress: false
 
 permissions:
-  contents: write           # singura permisiune necesara: scrie index.html si state.json
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   actualizeaza:
@@ -25,8 +30,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      # FAZA 1: doar pagina, fara notificari.
-      # Cand vrei Telegram/mail: adauga secretele in Settings si sterge "--no-notify".
+      # Pagina se scrie in public/, care devine artefactul publicat.
+      # Cand vrei Telegram/mail: adauga secretele si sterge "--no-notify".
       - name: Ruleaza monitorul
         env:
           FLUX_TG_TOKEN:   ${{ secrets.FLUX_TG_TOKEN }}
@@ -36,17 +41,35 @@ jobs:
           FLUX_SMTP_PASS:  ${{ secrets.FLUX_SMTP_PASS }}
           FLUX_MAIL_TO:    ${{ secrets.FLUX_MAIL_TO }}
           FLUX_URL_PUBLIC: ${{ vars.FLUX_URL_PUBLIC }}
-        run: python flux_bvb.py --out index.html --quiet --no-notify
+        run: |
+          python flux_bvb.py --out public/index.html --no-notify
+          touch public/.nojekyll
 
-      # Pages serveste direct din ramura, deci publicarea inseamna doar un commit.
-      - name: Publica pagina
+      # Doar memoria de deduplicare se salveaza in repo. Pagina NU mai trece
+      # prin commit: push-urile facute cu tokenul implicit nu declanseaza
+      # publicarea Pages, si exact asta blocase actualizarea site-ului.
+      - name: Salveaza memoria
         run: |
           git config user.name  "flux-bot"
           git config user.email "flux-bot@users.noreply.github.com"
-          git add index.html state.json
+          git add state.json
           if git diff --staged --quiet; then
-            echo "Nimic schimbat."
+            echo "Nimic nou de memorat."
           else
-            git commit -m "flux: $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git commit -m "state: $(date -u '+%Y-%m-%d %H:%M UTC')"
             git push
           fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  publica:
+    needs: actualizeaza
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
