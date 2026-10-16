@@ -1,0 +1,94 @@
+name: Flux BVB
+
+on:
+  schedule:
+    # De doua ori pe ora, la :13 si :43. NU la fix: GitHub documenteaza ca
+    # inceputul fiecarei ore e varf de incarcare si ca rularile din coada pot fi
+    # abandonate acolo. Doua incercari pe ora inseamna ca, si daca una e pierduta,
+    # pagina ramane sub o ora vechime.
+    - cron: "13,43 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "flux_bvb.py"
+      - "flux_template.html"
+      - "companii.json"
+      - ".github/workflows/flux.yml"
+
+concurrency:
+  group: flux-bvb
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  actualizeaza:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10        # o rulare blocata nu mai tine coada ocupata o ora
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Ruleaza monitorul
+        env:
+          FLUX_TG_TOKEN:   ${{ secrets.FLUX_TG_TOKEN }}
+          FLUX_TG_CHAT:    ${{ secrets.FLUX_TG_CHAT }}
+          FLUX_SMTP_HOST:  ${{ secrets.FLUX_SMTP_HOST }}
+          FLUX_SMTP_USER:  ${{ secrets.FLUX_SMTP_USER }}
+          FLUX_SMTP_PASS:  ${{ secrets.FLUX_SMTP_PASS }}
+          FLUX_MAIL_TO:    ${{ secrets.FLUX_MAIL_TO }}
+          FLUX_URL_PUBLIC: ${{ vars.FLUX_URL_PUBLIC }}
+        run: |
+          python flux_bvb.py --out public/index.html --no-notify
+          touch public/.nojekyll
+
+      # Memoria de deduplicare NU mai are voie sa opreasca publicarea.
+      # Inainte, un singur push esuat facea jobul rosu, iar "publica" (care
+      # depinde de el) nu mai rula deloc - adica pagina ramanea nepublicata
+      # pentru ora aceea. Acum push-ul se reincearca si, daca tot nu merge,
+      # se trece mai departe.
+      - name: Salveaza memoria
+        continue-on-error: true
+        run: |
+          git config user.name  "flux-bot"
+          git config user.email "flux-bot@users.noreply.github.com"
+          git add state.json
+          if git diff --staged --quiet; then
+            echo "Nimic nou de memorat."
+            exit 0
+          fi
+          git commit -m "state: $(date -u '+%Y-%m-%d %H:%M UTC')"
+          for i in 1 2 3; do
+            if git push; then
+              echo "Memorie salvata."
+              exit 0
+            fi
+            echo "Push esuat (incercarea $i). Reiau peste ce a aparut intre timp."
+            git pull --rebase --autostash || true
+            sleep 5
+          done
+          echo "Push-ul nu a reusit. Pagina se publica oricum; memoria se reia la rularea urmatoare."
+
+      # Publicarea ruleaza chiar daca pasul de mai sus a avut probleme.
+      - uses: actions/upload-pages-artifact@v3
+        if: always()
+        with:
+          path: public
+
+  publica:
+    needs: actualizeaza
+    if: always()               # artefactul exista; nu-l blocam pentru un pas secundar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
