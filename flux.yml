@@ -18,7 +18,12 @@ on:
 
 concurrency:
   group: flux-bvb
-  cancel-in-progress: false
+  # true, NU false. GitHub tine o singura rulare "pending" per grup si o
+  # anuleaza pe cea dinainte, deci cu `false` o rulare blocata opreste tot
+  # ce urmeaza pana expira (limita implicita: 6 ore). Aici conteaza doar
+  # cea mai recenta colectare, deci o rulare noua trebuie sa o inlocuiasca
+  # pe una agatata, nu sa astepte dupa ea.
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -48,6 +53,12 @@ jobs:
         run: |
           python flux_bvb.py --out public/index.html --no-notify
           touch public/.nojekyll
+          # Verificare explicita: daca pagina nu s-a scris sau e suspect de
+          # mica, oprim aici cu un mesaj clar, in loc sa publicam ceva rupt.
+          test -s public/index.html || { echo "EROARE: index.html nu a fost generat"; exit 1; }
+          octeti=$(wc -c < public/index.html)
+          echo "Pagina generata: $octeti octeti"
+          [ "$octeti" -gt 20000 ] || { echo "EROARE: pagina pare incompleta ($octeti octeti)"; exit 1; }
 
       # Memoria de deduplicare NU mai are voie sa opreasca publicarea.
       # Inainte, un singur push esuat facea jobul rosu, iar "publica" (care
@@ -76,16 +87,19 @@ jobs:
           done
           echo "Push-ul nu a reusit. Pagina se publica oricum; memoria se reia la rularea urmatoare."
 
-      # Publicarea ruleaza chiar daca pasul de mai sus a avut probleme.
+      # FARA `if: always()` aici. Pasul de memorie are deja continue-on-error,
+      # deci nu poate opri nimic. In schimb, `always()` ar fi urcat pagina si
+      # cand generarea a esuat - adica am fi publicat o pagina rupta peste una
+      # buna. Asa, daca generarea cade, nu se publica nimic si ramane ultima
+      # versiune buna.
       - uses: actions/upload-pages-artifact@v3
-        if: always()
         with:
           path: public
 
   publica:
-    needs: actualizeaza
-    if: always()               # artefactul exista; nu-l blocam pentru un pas secundar
+    needs: actualizeaza         # ruleaza doar daca exista o pagina valida
     runs-on: ubuntu-latest
+    timeout-minutes: 10        # fara asta mosteneste 6 ore si blocheaza grupul
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
