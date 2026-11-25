@@ -453,7 +453,30 @@ def scrie_pagina(stiri: list[dict], cfg: dict, iesire: Path | None = None) -> Pa
     tinta = iesire or OUTPUT_PATH
     tinta.parent.mkdir(parents=True, exist_ok=True)
     tinta.write_text(pagina, encoding="utf-8")
+    copiaza_resurse(tinta.parent)
     return tinta
+
+
+# Fisierele care fac pagina instalabila pe telefon. Stau in repo langa script si
+# trebuie sa ajunga in acelasi director cu pagina publicata, altfel iPhone-ul
+# instaleaza aplicatia fara iconita. Cele care lipsesc sunt ignorate.
+RESURSE_APLICATIE = ("manifest.webmanifest", "apple-touch-icon.png",
+                     "icon-192.png", "icon-512.png")
+
+
+def copiaza_resurse(director: Path) -> None:
+    import shutil
+    for nume in RESURSE_APLICATIE:
+        sursa = HERE / nume
+        if not sursa.exists():
+            continue
+        dest = director / nume
+        if dest.resolve() == sursa.resolve():
+            continue
+        try:
+            shutil.copyfile(sursa, dest)
+        except OSError as e:
+            print(f"Nu am putut copia {nume}: {e}", flush=True)
 
 
 def text_telegram(noi: list[dict], url_public: str = "") -> str:
