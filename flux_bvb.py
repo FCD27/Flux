@@ -87,12 +87,12 @@ FEEDURI_GENERALE = [
 CATEGORII = [
     ("Dividende",    r"dividend|ex-date|data plat|randament|rascumpar|buyback|actiuni gratuite"),
     ("Rezultate",    r"profit|rezultate|raport (trimestrial|semestrial|anual)|cifra de afaceri|ebitda|venituri|marja"),
-    ("Reglementare", r"anre|asf|consiliul concurent|amend|lege|ordonant|impozit|taxa|plafonar|reglementar|instant|proces|sanctiun"),
+    ("Reglementare", r"\banre\b|\basf\b|consiliul concurent|amend|\blege\b|\blegea\b|\blegi\b|ordonant|impozit|taxa|plafonar|reglementar|instant|proces|sanctiun"),
     ("Tranzactii",   r"achizit|preluare|vanzare de|fuziune|tranzacti|participat|pachet de actiuni|oferta publica|vinde|cumpar|cumper|achizitie"),
     ("Analiza",      r"analist|analiz|pret tinta|rating|recomandare|evaluare|target|fitch|moody|s&p|upgrade|downgrade"),
     ("Guvernanta",   r"\baga\b|agoa|agea|adunare|consiliu|director|ceo|mandat|convocare|actionariat|actionar"),
     ("Operational",  r"producti|investit|capacitat|proiect|foraj|sonda|platform|centrala|retehnolog|contract|livrare"),
-    ("Piata",        r"bvb|bursa|indice|bet|sedint|rulaj|lichiditate|cotati|inchide|actiunile"),
+    ("Piata",        r"bvb|bursa|indice|\bbet\b|sedint|rulaj|lichiditate|cotati|inchide|actiunile"),
 ]
 
 # Etichetele afisate in pagina folosesc diacritice; tiparele de mai sus, nu.
@@ -181,6 +181,10 @@ def cheie(ticker: str, titlu: str) -> str:
 
 def clasifica(titlu: str, rezumat: str) -> tuple[str, str, int]:
     text = fara_diacritice(f"{titlu} {rezumat}").lower()
+    # numele publicatiilor nu spun nimic despre subiect: „Profit.ro” nu e o
+    # stire despre profit, „Ziarul Bursa” nu e o stire despre bursa
+    text = re.sub(r"\b[\w-]+\.(ro|com|net|eu|md)\b", " ", text)
+    text = re.sub(r"ziarul (bursa|financiar)|bursa\.ro|curs de guvernare", " ", text)
     categorie = "Piata"
     for nume, tipar in CATEGORII:
         if re.search(tipar, text):

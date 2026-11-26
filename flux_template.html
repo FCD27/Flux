@@ -230,8 +230,6 @@ html,body{background:#0A1B21;margin:0}
     </div>
     <div class="masthead-right">
       <span class="stamp" id="stamp">Se încarcă&hellip;</span>
-      <button class="btn-ghost" id="copy">Copiază cererea</button>
-      <button class="btn" id="live">Știri live ↗</button>
     </div>
   </header>
 
@@ -245,7 +243,7 @@ html,body{background:#0A1B21;margin:0}
         <div class="chips" id="cats"></div>
       </div>
 
-      <div class="rail-block">
+      <div class="rail-block" id="verify-block">
         <p class="rail-label" id="verify-label">Verifică la sursă</p>
         <div class="verify" id="verify"></div>
       </div>
@@ -274,7 +272,7 @@ html,body{background:#0A1B21;margin:0}
     culoarea (pozitiv/negativ) sunt puse automat, după cuvinte-cheie, și pot greși. Datele de dividend
     sunt verificate manual (ultima verificare: 26 noiembrie 2026), iar starea lor se actualizează singură
     după dată. Sumele nete folosesc impozitul standard de 16%. Nu este consultanță de investiții sau
-    fiscală &mdash; verifică întotdeauna comunicatul emitentului, din „Verifică la sursă”.
+    fiscală &mdash; verifică întotdeauna comunicatul emitentului; linkurile directe apar în stânga când alegi o companie.
   </footer>
 </div>
 
@@ -686,16 +684,6 @@ html,body{background:#0A1B21;margin:0}
     try{ if(window.localStorage) window.localStorage.setItem(CHEIE_MEM,payload); }catch(e){}
   }
 
-  /* ---------- știri live ----------
-     Acest mediu blochează orice cerere externă din pagină: nici API-ul, nici releele
-     RSS nu răspund. Singura cale reală către știri live e navigarea, nu fetch-ul. */
-  function openLive(){
-    var t=null;
-    TICKERS.forEach(function(x){ if(x.s===state.ticker) t=x; });
-    var q = t ? '"'+t.q+'"'
-              : '("Hidroelectrica" OR "Fondul Proprietatea" OR "Banca Transilvania" OR "OMV Petrom" OR "Romgaz")';
-    window.open(cautaTot(q,"w"),"_blank","noopener");
-  }
 
 
   /* ---------- randare ---------- */
@@ -707,53 +695,20 @@ html,body{background:#0A1B21;margin:0}
     }).sort(function(a,b){ return a.d<b.d?1:a.d>b.d?-1:(b.i-a.i); });
   }
 
-  /* Cele șapte surse urmărite, plus economedia pentru guvernanța FP. */
-  var SURSE=[
-    {n:"bvb.ro",       u:"https://bvb.ro/FinancialInstruments/Markets/Shares"},
-    {n:"zf.ro",        u:"https://www.zf.ro/burse-fonduri-mutuale/"},
-    {n:"bursa.ro",     u:"https://www.bursa.ro/"},
-    {n:"profit.ro",    u:"https://www.profit.ro/"},
-    {n:"wall-street.ro",u:"https://www.wall-street.ro/"},
-    {n:"tradeville.ro",u:"https://tradeville.ro/"},
-    {n:"forbes.ro",    u:"https://www.forbes.ro/"},
-    {n:"primet.ro",    u:"https://www.primet.ro/"}
-  ];
-  var SITE_Q="(site:bvb.ro OR site:zf.ro OR site:bursa.ro OR site:profit.ro OR "+
-             "site:wall-street.ro OR site:tradeville.ro OR site:forbes.ro OR site:economedia.ro)";
-
-  function cautaTot(fraza,fereastra){
-    return "https://www.google.com/search?tbs=qdr:"+(fereastra||"m")+
-      "&q="+encodeURIComponent(fraza+" "+SITE_Q);
-  }
-  function grilaSurse(){
-    return '<div class="srcgrid">'+SURSE.map(function(s){
-      return '<a href="'+s.u+'" target="_blank" rel="noopener noreferrer">'+s.n+"</a>";
-    }).join("")+"</div>";
-  }
-
   function renderVerify(){
     var t=null;
     TICKERS.forEach(function(x){ if(x.s===state.ticker) t=x; });
 
-    if(!t){
-      $("verify-label").textContent="Cele opt surse urmărite";
-      var toate='"Hidroelectrica" OR "Fondul Proprietatea" OR "Banca Transilvania" OR "OMV Petrom" OR "Romgaz"';
-      $("verify").innerHTML=
-        '<a class="searchall" href="'+esc(cautaTot("("+toate+")","w"))+'" target="_blank" rel="noopener noreferrer">'+
-          'Caută toate cinci ↗<span>Ultima săptămână, pe toate sursele</span></a>'+
-        grilaSurse();
-      return;
-    }
+    // la „Toate” nu arătăm nimic aici; linkurile apar când alegi o companie
+    $("verify-block").style.display = t ? "" : "none";
+    if(!t){ $("verify").innerHTML=""; return; }
 
     $("verify-label").textContent="Verifică "+t.s+" la sursă";
     $("verify").innerHTML=
-      '<a class="searchall" href="'+esc(cautaTot('"'+t.q+'"',"m"))+'" target="_blank" rel="noopener noreferrer">'+
-        'Caută '+t.s+' ↗<span>Ultima lună, pe toate sursele</span></a>'+
       '<a href="https://bvb.ro/FinancialInstruments/Details/FinancialInstrumentsDetails.aspx?s='+t.bvb+'" target="_blank" rel="noopener noreferrer">bvb.ro / '+t.s+'<span>Toate rapoartele curente</span></a>'+
       '<a href="https://tradeville.ro/actiuni/'+t.tv+'/stiri" target="_blank" rel="noopener noreferrer">tradeville / '+t.s+'<span>Știri și comunicate</span></a>'+
       '<a href="https://tradeville.ro/actiuni/'+t.tv+'/dividende" target="_blank" rel="noopener noreferrer">tradeville / dividende<span>Istoric complet</span></a>'+
-      '<a href="https://www.primet.ro/informatii-piata-cotatii-bursa?simbol='+t.pm+'" target="_blank" rel="noopener noreferrer">primet.ro / '+t.s+'<span>Comunicate, cronologic</span></a>'+
-      grilaSurse();
+      '<a href="https://www.primet.ro/informatii-piata-cotatii-bursa?simbol='+t.pm+'" target="_blank" rel="noopener noreferrer">primet.ro / '+t.s+'<span>Comunicate, cronologic</span></a>';
   }
 
   function renderRail(){
@@ -793,14 +748,9 @@ html,body{background:#0A1B21;margin:0}
         'se schimbă singură după dată. Opțional, scrie numărul de acțiuni și îți calculez sumele nete.</div>';
       return;
     }
-    if(GENERAT){
-      b.innerHTML='<div class="banner ok"><b>Pagină generată de flux_bvb.py.</b> '+
-        'Se reîmprospătează la fiecare rulare a scriptului, așa că de fiecare dată când o deschizi '+
-        'vezi ce era proaspăt la ultima verificare. <b>Știri live</b> deschide căutarea pe toate sursele.</div>';
-    } else {
-      b.innerHTML='<div class="banner warn"><b>Nu s-au injectat date &mdash; vezi sinteza de rezervă.</b> '+
-        'Rulează <code>python3 flux_bvb.py</code> ca să regenerezi pagina cu știrile la zi.</div>';
-    }
+    b.innerHTML = GENERAT ? "" :
+      '<div class="banner warn"><b>Știrile nu s-au putut încărca.</b> '+
+      'Se afișează o selecție mai veche până la următoarea actualizare.</div>';
   }
 
   /* Google News pune ca „rezumat” chiar titlul plus numele sursei. Nu-l
@@ -830,7 +780,7 @@ html,body{background:#0A1B21;margin:0}
       '<div class="meta">'+
         '<span class="meter" title="Impact estimat '+x.i+' din 5">'+meter+"</span>"+
         '<span class="cat">'+esc(x.c)+"</span>"+
-        '<span class="src">'+esc(curataSursa(x.src))+" · "+esc(x.d)+"</span>"+
+        '<span class="src">'+esc(curataSursa(x.src))+" · "+esc(dataRo(x.d))+"</span>"+
         (x.u?'<a class="open" href="'+esc(x.u)+'" target="_blank" rel="noopener noreferrer">Deschide ↗</a>':"")+
       "</div></div></article>";
   }
@@ -937,17 +887,8 @@ html,body{background:#0A1B21;margin:0}
       (state.ticker==="ALL"?"":" · "+state.ticker)+(state.cat==="ALL"?"":" · "+state.cat);
     $("feed").innerHTML=rows.length?rows.map(storyHTML).join(""):
       '<div class="empty"><h3>Nicio știre pentru acest filtru</h3>'+
-      "<p>Renunță la filtrul de subiect sau alege altă deținere.</p></div>";
+      "<p>Renunță la filtrul de subiect sau alege altă companie.</p></div>";
   }
-
-  var CERERE="Actualizează-mi sinteza BVB și fii exhaustiv. Pentru fiecare dintre Hidroelectrica (H2O), "+
-    "Fondul Proprietatea (FP), Banca Transilvania (TLV), OMV Petrom (SNP) și Romgaz (SNG), caută separat "+
-    "toate știrile din ultimele 7 zile: rapoarte curente BVB, rezultate, dividende, AGA, reglementare, "+
-    "tranzacții, rating-uri, analize, ședințe de bursă. Caută obligatoriu pe bvb.ro, zf.ro, bursa.ro, "+
-    "profit.ro, wall-street.ro, tradeville.ro, forbes.ro și primet.ro, inclusiv pe paginile de emitent "+
-    "ale fiecărui simbol de pe bvb.ro, tradeville.ro și primet.ro. Confirmă și dacă s-a "+
-    "schimbat ceva la calendarul de dividende. Dă-mi pentru fiecare știre titlul, un rezumat de o frază, "+
-    "sursa, data și linkul, cele mai noi întâi.";
 
   var root=document.getElementById("flux");
   root.addEventListener("click",function(e){
@@ -967,17 +908,6 @@ html,body{background:#0A1B21;margin:0}
     if(again){ again.focus(); try{ again.setSelectionRange(pos,pos); }catch(err){} }
     saveShares();
   });
-  $("live").addEventListener("click",openLive);
-  $("copy").addEventListener("click",function(){
-    var btn=$("copy");
-    function done(ok){
-      btn.textContent=ok?"Copiat":"Copiază manual";
-      setTimeout(function(){ btn.textContent="Copiază cererea"; },2200);
-    }
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(CERERE).then(function(){done(true);},function(){done(false);});
-    } else { done(false); }
-  });
 
   /* Marcajul de timp e singurul semn ca sistemul mai respira. Il aratam
      explicit, cu vechime relativa, si il colorăm cand trece de 3 ore —
@@ -993,13 +923,13 @@ html,body{background:#0A1B21;margin:0}
             : min<120 ? "acum o oră"
             : min<1440 ? "acum "+Math.floor(min/60)+" ore"
             : "acum "+Math.floor(min/1440)+(Math.floor(min/1440)===1?" zi":" zile");
-    el.className = "stamp" + (min>180 ? " vechi" : "");
+    el.className = "stamp" + (min>120 ? " vechi" : "");
     el.innerHTML = "Ultima verificare <b>" +
       g.toLocaleString("ro-RO",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) +
       "</b> <span class=\"rel\">· " + rel + "</span>";
-    el.title = min>180
-      ? "Scriptul ar trebui sa ruleze din ora in ora. Verifica tab-ul Actions din GitHub."
-      : "Ora ultimei cautari pe surse, in ora ta locala.";
+    el.title = min>120
+      ? "Actualizarea ar trebui să ruleze la fiecare 30 de minute. Atinge pentru reîncărcare."
+      : "Ora ultimei căutări de știri. Atinge pentru reîncărcare.";
   }
 
   /* Pe iPhone, instalata pe ecran, pagina nu are buton de reincarcare. Deci:
