@@ -261,6 +261,17 @@ def parseaza_rss(continut: bytes, sursa_implicita: str) -> list[dict]:
                 sursa = titlu[taie + 3:]
                 titlu = titlu[:taie]
 
+        # titluri fara continut (credite foto etc.)
+        if re.match(r"(?i)^(sursa foto|foto:|video:|galerie foto)", titlu):
+            continue
+        # Google News repeta titlul ca rezumat; nu-l pastram de doua ori
+        def _n(t):
+            return re.sub(r"[^a-z0-9 ]", " ", fara_diacritice(t).lower()).split()
+        if _n(rezumat)[:6] == _n(titlu)[:6]:
+            rezumat = ""
+        sursa = re.sub(r"(?i)^https?://", "", sursa)
+        sursa = re.sub(r"(?i)^www\.", "", sursa).split("/")[0].strip() or sursa_implicita
+
         iesire.append({
             "titlu": titlu,
             "link": link,

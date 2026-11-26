@@ -187,6 +187,9 @@ html,body{background:#0A1B21;margin:0}
 #flux .dstate.platit{background:var(--rule);color:var(--muted)}
 #flux .dstate.urmeaza{background:var(--amber);color:#052026;font-weight:600}
 #flux .dstate.propus{border:1px solid var(--dim);color:var(--muted)}
+#flux .dstate.posibil{border:1px dashed var(--dim);color:var(--muted)}
+#flux .dstate.respins{border:1px solid var(--down);color:var(--down)}
+#flux .dstate.incasare{background:var(--turbine);color:#052026;font-weight:600}
 #flux .dnote{grid-column:1/-1;font-size:12px;color:var(--muted);line-height:1.5;padding-top:2px}
 #flux .dnote a{color:var(--turbine);text-decoration:none}
 #flux .dnote a:hover{text-decoration:underline}
@@ -267,11 +270,11 @@ html,body{background:#0A1B21;margin:0}
   </div>
 
   <footer class="foot">
-    Sinteză documentată pe 6 august 2026, din rapoarte BVB și presa financiară românească. Sumele nete sunt
-    calculate cu impozitul standard de 16% reținut la sursă; cota ta poate diferi. Nu este consultanță de
-    investiții sau fiscală. Surse urmărite: bvb.ro, zf.ro, bursa.ro, profit.ro, wall-street.ro,
-    tradeville.ro, forbes.ro și primet.ro. Verifică întotdeauna comunicatul emitentului prin linkurile
-    „Verifică la sursă” din stânga.
+    Știrile se adună automat din Google News și din fluxurile presei financiare; categoria și
+    culoarea (pozitiv/negativ) sunt puse automat, după cuvinte-cheie, și pot greși. Datele de dividend
+    sunt verificate manual (ultima verificare: 26 noiembrie 2026), iar starea lor se actualizează singură
+    după dată. Sumele nete folosesc impozitul standard de 16%. Nu este consultanță de investiții sau
+    fiscală &mdash; verifică întotdeauna comunicatul emitentului, din „Verifică la sursă”.
   </footer>
 </div>
 
@@ -291,38 +294,38 @@ html,body{background:#0A1B21;margin:0}
   /* ============ DIVIDENDE 2026 ============ */
   var DIV=[
     {t:"H2O",nume:"Dividend de bilanț 2025",brut:7.348365,total:"3,31 mld. lei",
-     ex:"2026-06-03",inreg:"2026-06-04",plata:"2026-06-25",stare:"platit",
+     ex:"2026-06-03",inreg:"2026-06-04",plata:"2026-06-25",
      nota:"Aproape tot profitul net pe 2025, de 3,37 mld. lei. Statul a încasat circa 2,64 mld. lei, pe participația de 80,06%. Comisioanele BRD și Depozitarul Central sunt suportate de companie.",
      u:"https://www.economica.net/hidroelectrica-incepe-plata-dividendelor-pentru-anul-2025-ce-trebuie-sa-stie-si-sa-faca-actionarii_943916.html"},
     {t:"H2O",nume:"Dividend special",brut:2.223197,total:"1,00 mld. lei",
-     ex:"2026-09-08",inreg:"2026-09-09",plata:"2026-09-30",stare:"urmeaza",
-     nota:"Din surplusul realizat din rezerve din reevaluare, aprobat în AGOA din 29 mai. Statul primește circa 800,5 mil. lei.",
-     u:"https://www.zf.ro/burse-fonduri-mutuale/unda-verde-de-la-actionarii-hidroelectrica-pentru-dividende-speciale-23163317"},
+     ex:"2026-09-08",inreg:"2026-09-09",plata:"2026-09-30",
+     nota:"Din surplusul realizat din rezerve din reevaluare, aprobat în AGOA din 29 mai. Statul a primit circa 800,5 mil. lei.",
+     u:"https://financialintelligence.ro/hidroelectrica-plateste-dividendele-speciale-de-1-miliard-de-lei/"},
 
     {t:"TLV",nume:"Dividend din profitul 2025",brut:1.2840240875,total:"1,40 mld. lei",
-     ex:"2026-06-15",inreg:"2026-06-16",plata:"2026-06-30",stare:"platit",
+     ex:"2026-06-15",inreg:"2026-06-16",plata:"2026-06-30",
      nota:"Circa 34% din profitul net de 4,095 mld. lei. Titularii de cont la BT au primit banii prin virament automat.",
      u:"https://www.bancatransilvania.ro/relatii-investitori/faq"},
     {t:"TLV",nume:"Acțiuni gratuite (nu numerar)",brut:0,total:"157,26 mil. acțiuni",
-     ex:"2026-07-16",inreg:"2026-07-17",plata:"2026-07-20",stare:"platit",
+     ex:"2026-07-16",inreg:"2026-07-17",plata:"2026-07-20",
      nota:"Majorare de capital cu 1,57 mld. lei din rezerve: circa 14,42 acțiuni noi la fiecare 100 deținute. Nu intră în calculul de mai jos, fiindcă nu e o plată în bani.",
      u:"https://www.zf.ro/burse-fonduri-mutuale/banca-transilvania-imparte-1-4-miliarde-de-lei-ca-dividende-si-emite-23141537"},
-    {t:"TLV",nume:"Posibil dividend special de toamnă",brut:0,total:"~700 mil. lei",
-     ex:"",inreg:"",plata:"",stare:"propus",
-     nota:"Circa 700 mil. lei au rămas nedistribuite din profitul 2025. Omer Tetik a spus că acționarii vor fi întrebați dacă performanța se menține. Nimic aprobat încă.",
+    {t:"TLV",nume:"Posibil dividend special",brut:0,total:"~700 mil. lei",
+     ex:"",inreg:"",plata:"",stare:"posibil",
+     nota:"În mai, CEO-ul Omer Tetik a spus că acționarii ar putea fi întrebați în toamnă despre circa 700 mil. lei rămași nedistribuiți din profitul 2025. Până la 26 noiembrie nu am găsit nicio adunare convocată pentru asta, deci nimic aprobat.",
      u:"https://www.zf.ro/burse-fonduri-mutuale/bursa-dividende-speciale-700-mil-lei-banca-transilvania-toamna-omer-23161709"},
 
     {t:"SNP",nume:"Dividend de bază 2025",brut:0.0466,total:"~2,90 mld. lei",
-     ex:"2026-05-14",inreg:"2026-05-15",plata:"2026-06-08",stare:"platit",
+     ex:"2026-05-14",inreg:"2026-05-15",plata:"2026-06-08",
      nota:"În creștere cu 5% față de anul anterior, în linie cu ținta de majorare graduală de 5-10% pe an până în 2030.",
      u:"https://www.bursa.ro/omv-petrom-aloca-un-dividend-cu-randament-net-de-5-procente-49889857"},
     {t:"SNP",nume:"Dividend special",brut:0.0112,total:"~700 mil. lei",
-     ex:"2026-05-14",inreg:"2026-05-15",plata:"2026-06-08",stare:"platit",
-     nota:"În scădere cu 44% față de anul trecut. Împreună cu cel de bază, 0,0578 lei brut și circa 3,6 mld. lei total — peste profitul net pe 2025, diferența acoperită din rezerve.",
+     ex:"2026-05-14",inreg:"2026-05-15",plata:"2026-06-08",
+     nota:"În scădere cu 44% față de anul trecut. Împreună cu cel de bază, 0,0578 lei brut și circa 3,6 mld. lei total — peste profitul net pe 2025, diferența acoperită din rezerve. După rezultatele pe 9 luni, compania a confirmat că dividendul rămâne cel aprobat în aprilie; AGOA din 6 noiembrie a fost despre Consiliul de Supraveghere, nu despre dividende.",
      u:"https://www.zf.ro/burse-fonduri-mutuale/premiera-la-omv-petrom-compania-propune-pentru-2026-dividende-totale-23038781"},
 
     {t:"SNG",nume:"Dividend din profitul 2025 și rezultat reportat",brut:0.1572,total:"605,9 mil. lei",
-     ex:"2026-07-06",inreg:"2026-07-07",plata:"2026-07-28",stare:"platit",
+     ex:"2026-07-06",inreg:"2026-07-07",plata:"2026-07-28",
      nota:"592,78 mil. lei din profitul anului plus 13,10 mil. din rezultatul reportat. Doar circa 18% rată de distribuire, pe fondul investițiilor în Neptun Deep. Statul a primit 424,17 mil. lei.",
      u:"https://www.bursa.ro/romgaz-propune-dividende-de-circa-600-milioane-lei-62067858"},
 
@@ -330,10 +333,10 @@ html,body{background:#0A1B21;margin:0}
      ex:"",inreg:"",plata:"",stare:"respins",
      nota:"0,0453 lei brut pe acțiune, propus de Equinox, Axor Holding și Intus Invest. Respins de acționari în AGOA din 23 iulie.",
      u:"https://financialintelligence.ro/fondul-proprietatea-redeschide-selectia-viitorului-administrator-actionarii-au-respins-dividendul-propus-si-revocarea-a-doi-membri-ai-comitetului-reprezentantilor/"},
-    {t:"FP",nume:"Propunere Lion Capital",brut:0.046,total:"~147 mil. lei",
-     ex:"",inreg:"",plata:"",stare:"propus",
-     nota:"Cerută pe 31 iulie de acționarul cu 11,274%. Randament de circa 7,6% la prețul de 0,603 lei. Franklin Templeton a confirmat condițiile legale de convocare, dar data AGOA nu e stabilită. Sumele de mai jos sunt orientative.",
-     u:"https://www.zf.ro/burse-fonduri-mutuale/lion-capital-vrea-dividende-de-0-046-lei-de-la-fondul-proprietatea-randament-de-7-7-23207019"}
+    {t:"FP",nume:"Dividend cerut de Lion Capital",brut:0.046,total:"~136 mil. lei",
+     ex:"2026-10-15",inreg:"2026-10-16",plata:"2026-11-09",
+     nota:"Cerut de Lion Capital (11,27%) după ce propunerea fondurilor slovene fusese respinsă în iulie. Aprobat în AGOA din 29 septembrie 2026. Nu se plătește pe acțiunile proprii ale Fondului, de aici totalul de circa 136 mil. lei.",
+     u:"https://m.bvb.ro/FinancialInstruments/SelectedData/NewsItem/FP-Structura-actionariat-la-data-de-16-octombrie-2026-Data-de-inregistrare/014BF"}
   ];
 
   var BRIEF=[
@@ -616,14 +619,12 @@ html,body{background:#0A1B21;margin:0}
      u:"https://rankia.ro/actiuni-romgaz-analiza-si-sugestii/"}
   ];
 
+  /* Termenele trecute se ascund singure. Cele cu „~” sunt estimări după
+     calendarul obișnuit al companiilor, nu date anunțate. */
   var DIARY=[
-    {when:"7 aug.", iso:"2026-08-07",t:"FP",     what:"Termen scrisori de intenție pentru administratori"},
-    {when:"12 aug.",iso:"2026-08-12",t:"FP",     what:"Termen pentru ofertele detaliate"},
-    {when:"~sep.",  iso:"2026-09-01",t:"FP",     what:"AGOA cerută de Lion Capital, dividend de 0,046 lei"},
-    {when:"8 sep.", iso:"2026-09-08",t:"H2O",    what:"Ex-date, dividend special de 2,2232 lei"},
-    {when:"30 sep.",iso:"2026-09-30",t:"H2O",    what:"Plata dividendului special"},
-    {when:"toamnă", iso:"2026-10-15",t:"TLV",    what:"Posibil dividend special de 700 mil. lei"},
-    {when:"2027",   iso:"2027-01-01",t:"SNP SNG",what:"Primele gaze din Neptun Deep"}
+    {when:"~feb.",  iso:"2027-02-28",t:"Toate",  what:"Rezultatele preliminare pe 2026"},
+    {when:"~apr.",  iso:"2027-04-30",t:"Toate",  what:"Adunările de bilanț votează dividendele din profitul pe 2026"},
+    {when:"2027",   iso:"2027-12-31",t:"SNP SNG",what:"Primele gaze din Neptun Deep"}
   ];
 
   /* Datele scrise de flux_bvb.py au prioritate; sinteza de mai sus e doar rezerva. */
@@ -776,19 +777,20 @@ html,body{background:#0A1B21;margin:0}
     $("cats").innerHTML=chips.join("");
 
     renderVerify();
-    var today=new Date().toISOString().slice(0,10);
-    $("diary").innerHTML=DIARY.map(function(e){
-      return '<li class="'+(e.iso<today?"past":"")+'"><span class="d-when">'+esc(e.when)+"</span>"+
+    var today=aziLocal();
+    var viitoare=DIARY.filter(function(e){ return !e.iso || e.iso>=today; });
+    $("diary").innerHTML=viitoare.length ? viitoare.map(function(e){
+      return '<li><span class="d-when">'+esc(e.when)+"</span>"+
         '<span class="d-what"><b>'+esc(e.t)+"</b> "+esc(e.what)+"</span></li>";
-    }).join("");
+    }).join("") : '<li><span class="d-what">Niciun termen anunțat deocamdată.</span></li>';
   }
 
   function renderBanner(){
     var b=$("banner");
     if(state.view==="div"){
       b.innerHTML='<div class="banner"><b>Toate distribuțiile din 2026 pentru cele cinci companii.</b> '+
-        'Scrie numărul de acțiuni la fiecare simbol și îți calculez sumele brute și nete, cu impozitul de 16% '+
-        'reținut la sursă. Numerele rămân salvate local, la tine.</div>';
+        'Datele sunt verificate manual (ultima verificare: 26 noiembrie 2026); starea fiecărui dividend '+
+        'se schimbă singură după dată. Opțional, scrie numărul de acțiuni și îți calculez sumele nete.</div>';
       return;
     }
     if(GENERAT){
@@ -801,6 +803,22 @@ html,body{background:#0A1B21;margin:0}
     }
   }
 
+  /* Google News pune ca „rezumat” chiar titlul plus numele sursei. Nu-l
+     afișăm de două ori. */
+  function normal(t){
+    return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
+  }
+  function rezumatUtil(h,s){
+    var nh=normal(h), ns=normal(s);
+    if(ns.length<25) return false;
+    var k=Math.min(40,nh.length);
+    return !(ns.slice(0,k)===nh.slice(0,k) || nh.indexOf(ns.slice(0,30))===0);
+  }
+  function curataSursa(t){
+    return String(t||"").replace(/^https?:\/\//i,"").replace(/^www\./i,"").replace(/\/.*$/,"") || "Sursă";
+  }
+
   function storyHTML(x){
     var cls=x.sent==="positive"?"pos":x.sent==="negative"?"neg":"";
     var meter=""; for(var i=1;i<=5;i++) meter+='<i class="'+(i<=x.i?"on":"")+'"></i>';
@@ -808,37 +826,67 @@ html,body{background:#0A1B21;margin:0}
     return '<article class="story '+cls+'"><div class="gutter"><span class="g-sym">'+x.t+"</span>"+
       '<span class="g-ago">'+esc(ago(x.d))+"</span></div><div>"+
       '<h2 class="headline">'+title+"</h2>"+
-      (x.s?'<p class="summary">'+esc(x.s)+"</p>":"")+
+      (x.s&&rezumatUtil(x.h,x.s)?'<p class="summary">'+esc(x.s)+"</p>":"")+
       '<div class="meta">'+
         '<span class="meter" title="Impact estimat '+x.i+' din 5">'+meter+"</span>"+
         '<span class="cat">'+esc(x.c)+"</span>"+
-        '<span class="src">'+esc(x.src)+" · "+esc(x.d)+"</span>"+
+        '<span class="src">'+esc(curataSursa(x.src))+" · "+esc(x.d)+"</span>"+
         (x.u?'<a class="open" href="'+esc(x.u)+'" target="_blank" rel="noopener noreferrer">Deschide ↗</a>':"")+
       "</div></div></article>";
   }
 
-  var STARI={platit:"Plătit",urmeaza:"Urmează",propus:"Propus",respins:"Respins"};
+  var STARI={platit:"Plătit",incasare:"Se plătește",urmeaza:"Urmează",
+             propus:"Propus",posibil:"Posibil",respins:"Respins"};
+
+  /* Ziua de azi după ceasul telefonului, nu după UTC: altfel, după miezul
+     nopții ora României, pagina ar rămâne cu o zi în urmă. */
+  function aziLocal(){
+    var d=new Date();
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  }
+  /* Starea se deduce din date, ca să nu mai rămână „Urmează” la o plată făcută. */
+  function stareDiv(d){
+    if(d.stare==="respins"||d.stare==="posibil"||d.stare==="propus") return d.stare;
+    if(!d.plata) return "propus";
+    var azi=aziLocal();
+    if(azi>=d.plata) return "platit";
+    if(d.ex && azi>=d.ex) return "incasare";
+    return "urmeaza";
+  }
+  function fmtBrut(v){
+    return v.toLocaleString("ro-RO",{minimumFractionDigits:2,maximumFractionDigits:6});
+  }
 
   function renderDiv(){
-    var today=new Date().toISOString().slice(0,10);
     var lista=DIV.filter(function(d){ return state.ticker==="ALL"||d.t===state.ticker; });
     var deIncasat=0, incasat=0;
 
     DIV.forEach(function(d){
       var n=state.shares[d.t]||0;
       if(!n||!d.brut) return;
-      var net=d.brut*n*(1-TAX);
-      if(d.stare==="urmeaza") deIncasat+=net;
-      else if(d.stare==="platit") incasat+=net;
+      var net=d.brut*n*(1-TAX), st=stareDiv(d);
+      if(st==="urmeaza"||st==="incasare") deIncasat+=net;
+      else if(st==="platit") incasat+=net;
     });
 
+    // urmatoarea plata aprobata, oricare ar fi compania
+    var viitoare=DIV.filter(function(d){
+      var st=stareDiv(d); return d.brut && (st==="urmeaza"||st==="incasare");
+    }).sort(function(a,b){ return a.plata<b.plata?-1:1; });
+    var urm=viitoare[0];
+    var ePosibil=DIV.some(function(d){ return stareDiv(d)==="posibil"; });
+
     var html='<div class="div-top"><div>'+
-      '<p class="lbl">De încasat de acum înainte, net</p>'+
-      '<div class="div-big">'+(deIncasat?nr(deIncasat):"—")+'<small>lei</small></div></div>'+
+      '<p class="lbl">Următoarea plată aprobată</p>'+
+      '<div class="div-big">'+(urm ? esc(urm.t)+' · '+fmtBrut(urm.brut)+'<small>lei/acț.</small>' : '—')+'</div></div>'+
       '<div class="div-hint">'+
-      (incasat?"Deja încasat în 2026: <b style=\"color:var(--text)\">"+nr(incasat)+" lei</b> net. ":"")+
-      'Singura plată în bani rămasă din ce e aprobat este dividendul special Hidroelectrica, pe 30 septembrie. '+
-      'Restul depinde de două adunări care nu au fost încă ținute.</div></div>';
+      (urm ? 'Plata pe <b style="color:var(--text)">'+dataRo(urm.plata)+'</b>'+
+             (stareDiv(urm)==="urmeaza" ? ', ex-date '+dataRo(urm.ex)+'. ' : ', ex-date-ul a trecut. ')
+           : 'Toate dividendele aprobate pentru 2026 au fost plătite. Următoarele se propun de obicei primăvara, la adunările de bilanț. ')+
+      (ePosibil ? 'Un dividend special e doar discutat, neaprobat. ' : '')+
+      (deIncasat ? 'De încasat pentru acțiunile tale: <b style="color:var(--text)">'+nr(deIncasat)+' lei</b> net. ' : '')+
+      (incasat ? 'Încasat în 2026: <b style="color:var(--text)">'+nr(incasat)+' lei</b> net.' : '')+
+      '</div></div>';
 
     TICKERS.forEach(function(t){
       var rows=lista.filter(function(d){ return d.t===t.s; });
@@ -855,9 +903,9 @@ html,body{background:#0A1B21;margin:0}
         var brutTot=d.brut*sh, netTot=brutTot*(1-TAX);
         html+='<div class="drow">'+
           '<div class="dname">'+esc(d.nume)+
-            '<span class="dstate '+d.stare+'">'+STARI[d.stare]+'</span>'+
-            '<em>Total distribuit: '+esc(d.total)+'</em></div>'+
-          '<div class="dval">'+(d.brut?'<b>'+nr(d.brut,d.brut<1?6:6)+'</b> lei brut/acț.':'<span style="color:var(--dim)">—</span>')+'</div>'+
+            '<span class="dstate '+stareDiv(d)+'">'+(stareDiv(d)==="platit"&&!d.brut?"Acordate":STARI[stareDiv(d)])+'</span>'+
+            '<em>'+({platit:"Total distribuit: ",incasare:"Total de plătit: ",urmeaza:"Total de plătit: "}[stareDiv(d)]||"Total propus: ")+esc(d.total)+'</em></div>'+
+          '<div class="dval">'+(d.brut?'<b>'+fmtBrut(d.brut)+'</b> lei brut/acț.':'<span style="color:var(--dim)">—</span>')+'</div>'+
           '<div class="ddate"><span>Ex-date</span>'+dataRo(d.ex)+'</div>'+
           '<div class="dyou">'+
             (d.brut&&sh?'<b>'+nr(netTot)+' lei</b><span>net · brut '+nr(brutTot)+'</span>':
