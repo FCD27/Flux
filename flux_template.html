@@ -961,6 +961,9 @@ html,body{background:#0A1B21;margin:0}
     incarcaProaspat();
   });
   setInterval(verificaVersiuneNoua, 10*60000);
+  /* iPhone poate porni aplicația dintr-o copie veche ținută în memorie;
+     verificăm imediat la pornire, nu doar la revenirea în prim-plan. */
+  setTimeout(verificaVersiuneNoua, 1500);
 
   render();
   randeazaStamp();
