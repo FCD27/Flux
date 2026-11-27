@@ -265,6 +265,11 @@ def parseaza_rss(continut: bytes, sursa_implicita: str) -> list[dict]:
                 sursa = titlu[taie + 3:]
                 titlu = titlu[:taie]
 
+        if sursa == sursa_implicita:
+            for copil in item:
+                if copil.tag.split("}")[-1].lower() == "source" and (copil.text or "").strip():
+                    sursa = curata(copil.text)
+                    break
         # titluri fara continut (credite foto etc.)
         if re.match(r"(?i)^(sursa foto|foto:|video:|galerie foto)", titlu):
             continue
@@ -291,6 +296,21 @@ def google_news(interogare: str) -> list[dict]:
            + urllib.parse.quote(f'"{interogare}"')
            + "&hl=ro&gl=RO&ceid=RO:ro")
     return parseaza_rss(http_get(url), "Google News")
+
+
+def bing_news(interogare: str) -> list[dict]:
+    """A doua sursa agregata, ca pagina sa nu depinda doar de Google News,
+    care raspunde uneori cu 429/503 serverelor GitHub."""
+    url = ("https://www.bing.com/news/search?q="
+           + urllib.parse.quote(f'"{interogare}"')
+           + "&format=rss&setlang=ro-RO&cc=RO&qft=sortbydate%3d%221%22")
+    iesire = parseaza_rss(http_get(url), "Bing News")
+    for it in iesire:
+        # Bing da un link de redirectionare; pastram adresa reala a articolului
+        real = urllib.parse.parse_qs(urllib.parse.urlparse(it["link"]).query).get("url")
+        if real:
+            it["link"] = real[0]
+    return iesire
 
 
 def rapoarte_bvb(simbol: str) -> list[dict]:
@@ -351,20 +371,37 @@ def potrivit(item: dict, tk: dict) -> bool:
     return bool(re.search(rf"\b{tk['s'].lower()}\b", text))
 
 
-def aduna(zile_max: int = 90) -> tuple[list[dict], list[str]]:
+def aduna(zile_max: int = 90, cu_google: bool = True) -> tuple[list[dict], list[str]]:
     """Returneaza (stiri, jurnal_diagnostic). Sursele se citesc in paralel:
     secvential se pierdeau peste 20 de secunde doar in pauze."""
     jurnal: list[str] = []
     brute: list[tuple[str, dict]] = []
     limita = (datetime.now(timezone.utc) - timedelta(days=zile_max)).date().isoformat()
 
-    def ia_google(tk: dict):
+    def ia_google_toate():
+        # Pe rand, cu pauza: cinci cereri simultane de pe acelasi server sunt
+        # exact ce face Google sa raspunda cu 429/503.
+        linii, elemente = [], []
+        for n, tk in enumerate(TICKERS):
+            if n:
+                time.sleep(3)
+            try:
+                g = google_news(tk["cauta"])
+                linii.append(f"OK   Google News · {tk['s']} · {len(g)} titluri")
+                elemente += [(tk["s"], x) for x in g]
+            except Exception as e:
+                cod = getattr(e, "code", "")
+                linii.append(f"EROARE Google News · {tk['s']} · {type(e).__name__}{f' {cod}' if cod else ''}")
+        return "\n".join(linii), elemente
+
+    def ia_bing(tk: dict):
         try:
-            g = google_news(tk["cauta"])
-            return f"OK   Google News · {tk['s']} · {len(g)} titluri", [(tk["s"], x) for x in g]
+            g = [x for x in bing_news(tk["cauta"]) if potrivit(x, tk)]
+            et = "OK  " if g else "GOL "
+            return f"{et} Bing News · {tk['s']} · {len(g)} titluri", [(tk["s"], x) for x in g]
         except Exception as e:
             cod = getattr(e, "code", "")
-            return f"EROARE Google News · {tk['s']} · {type(e).__name__}{f' {cod}' if cod else ''}", []
+            return f"EROARE Bing News · {tk['s']} · {type(e).__name__}{f' {cod}' if cod else ''}", []
 
     def ia_bvb(tk: dict):
         try:
@@ -393,14 +430,18 @@ def aduna(zile_max: int = 90) -> tuple[list[dict], list[str]]:
 
     sarcini = []
     with cf.ThreadPoolExecutor(max_workers=6) as pool:
+        if cu_google:
+            sarcini.append(pool.submit(ia_google_toate))
+        else:
+            jurnal.append("PAUZA Google News · interogat recent, sar peste rularea asta")
         for tk in TICKERS:
-            sarcini.append(pool.submit(ia_google, tk))
+            sarcini.append(pool.submit(ia_bing, tk))
             sarcini.append(pool.submit(ia_bvb, tk))
         for nume, url in FEEDURI_GENERALE:
             sarcini.append(pool.submit(ia_feed, nume, url))
         for f in sarcini:
             linie, elemente = f.result()
-            jurnal.append(linie)
+            jurnal += linie.split("\n")
             brute += elemente
 
     vazute: set[str] = set()
@@ -441,6 +482,21 @@ def incarca_stare() -> dict:
     return {"vazute": {}}
 
 
+def actualizeaza_arhiva(stare: dict, stiri: list[dict], zile_max: int) -> list[dict]:
+    """Pagina arata tot ce s-a gasit in ultimele `zile_max` zile, nu doar ce a
+    raspuns la rularea curenta. Daca o sursa pica o vreme (Google News
+    limiteaza des serverele GitHub), stirile deja gasite raman in pagina."""
+    arhiva: dict = stare.setdefault("arhiva", {})
+    for x in stiri:
+        arhiva[x["id"]] = x
+    limita = (datetime.now(timezone.utc) - timedelta(days=zile_max)).date().isoformat()
+    for k in [k for k, v in arhiva.items() if v.get("d", "") < limita]:
+        del arhiva[k]
+    toate = list(arhiva.values())
+    toate.sort(key=lambda x: (x["d"], x["i"]), reverse=True)
+    return toate
+
+
 def salveaza_stare(stare: dict) -> None:
     limita = (datetime.now(timezone.utc) - timedelta(days=120)).isoformat()
     stare["vazute"] = {k: v for k, v in stare["vazute"].items() if v > limita}
@@ -452,7 +508,7 @@ def scrie_pagina(stiri: list[dict], cfg: dict, iesire: Path | None = None) -> Pa
         raise SystemExit(f"Lipsește șablonul: {TEMPLATE_PATH}")
     sablon = TEMPLATE_PATH.read_text(encoding="utf-8")
 
-    pastreaza = int(cfg.get("stiri_in_pagina", 250))
+    pastreaza = int(cfg.get("stiri_in_pagina", 600))
     date = {
         "generat": datetime.now(timezone.utc).isoformat(),
         "stiri": stiri[:pastreaza],
@@ -643,8 +699,19 @@ def main() -> int:
         STATE_PATH.unlink()
         log("Stare ștearsă.", args.quiet)
 
+    stare = incarca_stare()
+    zile_max = int(cfg.get("zile_max", 90))
+    acum_dt = datetime.now(timezone.utc)
+    # Google News cel mult o data la ~50 de minute, indiferent cat de des
+    # ruleaza scriptul: altfel serverele GitHub ajung blocate temporar.
+    ultima_g = stare.get("google_incercat", "")
+    cu_google = args.test or not ultima_g or \
+        acum_dt - datetime.fromisoformat(ultima_g) >= timedelta(minutes=50)
+    if cu_google:
+        stare["google_incercat"] = acum_dt.isoformat()
+
     log("Citesc sursele…", args.quiet)
-    stiri, jurnal = aduna(int(cfg.get("zile_max", 90)))
+    stiri, jurnal = aduna(zile_max, cu_google)
 
     if args.test:
         print("\n--- diagnostic surse ---")
@@ -662,13 +729,17 @@ def main() -> int:
     for linie in jurnal:
         print("  " + linie, flush=True)
 
-    stare = incarca_stare()
-    acum = datetime.now(timezone.utc).isoformat()
+    acum = acum_dt.isoformat()
     noi = [x for x in stiri if x["id"] not in stare["vazute"]]
     prima_rulare = not stare["vazute"]
 
     for x in stiri:
         stare["vazute"].setdefault(x["id"], acum)
+    gasite_acum = len(stiri)
+    stiri = actualizeaza_arhiva(stare, stiri, zile_max)
+    # jurnalul ultimei rulari, ca sa se poata vedea din repo ce sursa a cazut
+    stare["ultima_rulare"] = {"cand": acum, "gasite_acum": gasite_acum,
+                              "in_pagina": len(stiri), "jurnal": jurnal}
     salveaza_stare(stare)
 
     if stiri:
